@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { BRAND } from '../../shared/brand'
+import { BRAND } from '../../components/brand'
 import logo from '../../assets/logo-preventiva.png'
+import Button from '../../components/Button'
+import IconField from '../../components/IconField'
 import {
   IconArrowLeft,
   IconHeadset,
@@ -14,7 +16,7 @@ import {
   IconCheck,
   IconUserPlus,
   IconLogin,
-} from '../../shared/icons'
+} from '../../components/icons'
 
 const HIGHLIGHTS = [
   'Postulación en menos de 2 minutos',
@@ -175,17 +177,14 @@ export default function Login({ onCreateAccount, onBackToJobs }) {
                 <label htmlFor="identifier" className="mb-1.5 block text-sm font-semibold text-slate-700">
                   Número de Documento o Correo Registrado <span className="text-[#ee7128]">*</span>
                 </label>
-                <div className="relative">
-                  <IconIdCard className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="identifier"
-                    type="text"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="Ej: 1020345678 o tu.correo@ejemplo.com"
-                    className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                  />
-                </div>
+                <IconField
+                  icon={IconIdCard}
+                  id="identifier"
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="Ej: 1020345678 o tu.correo@ejemplo.com"
+                />
               </div>
 
               {/* Contraseña */}
@@ -198,25 +197,24 @@ export default function Login({ onCreateAccount, onBackToJobs }) {
                     ¿Olvidaste tu contraseña o documento?
                   </a>
                 </div>
-                <div className="relative">
-                  <IconLock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Introduce tu clave personal de ingreso"
-                    className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                  >
-                    {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                  </button>
-                </div>
+                <IconField
+                  icon={IconLock}
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Introduce tu clave personal de ingreso"
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                    </button>
+                  }
+                />
               </div>
 
               {/* Recordar */}
@@ -231,13 +229,10 @@ export default function Login({ onCreateAccount, onBackToJobs }) {
               </label>
 
               {/* Submit */}
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1654a3] py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#134788]"
-              >
+              <Button type="submit" size="lg" fullWidth>
                 Ingresar a mi perfil
                 <IconLogin className="h-4 w-4" />
-              </button>
+              </Button>
             </form>
 
             {/* Crear cuenta */}
@@ -245,14 +240,10 @@ export default function Login({ onCreateAccount, onBackToJobs }) {
               <p className="text-sm text-slate-500">
                 ¿Aún no tienes cuenta? Postúlate y haz parte del equipo médico.
               </p>
-              <button
-                type="button"
-                onClick={onCreateAccount}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#ee7128] py-2.5 text-sm font-bold text-[#ee7128] transition-colors hover:bg-[#ee7128]/5 sm:w-auto sm:px-6"
-              >
+              <Button variant="accentOutline" onClick={onCreateAccount} className="mt-3 w-full sm:w-auto">
                 <IconUserPlus className="h-4 w-4" />
                 Crear cuenta y cargar hoja de vida
-              </button>
+              </Button>
             </div>
           </section>
         </div>

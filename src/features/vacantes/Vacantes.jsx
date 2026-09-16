@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { BRAND } from '../../shared/brand'
-import SiteHeader from '../../shared/SiteHeader'
-import SiteFooter from '../../shared/SiteFooter'
+import { BRAND } from '../../components/brand'
+import SiteHeader from '../../components/SiteHeader'
+import SiteFooter from '../../components/SiteFooter'
+import Button from '../../components/Button'
+import IconField from '../../components/IconField'
 import {
   IconUsers,
   IconBriefcase,
@@ -23,7 +25,7 @@ import {
   IconSmile,
   IconAward,
   IconMail,
-} from '../../shared/icons'
+} from '../../components/icons'
 
 const STATS = [
   { icon: IconBriefcase, value: '45+', label: 'Convocatorias abiertas' },
@@ -264,11 +266,6 @@ function FilterCheckbox({ label, count, defaultChecked }) {
 }
 
 function JobCard({ job, onSelect }) {
-  const buttonClass =
-    job.buttonTone === 'dark'
-      ? 'bg-[#0f3d78] hover:bg-[#0c2f5c]'
-      : 'bg-[#1654a3] hover:bg-[#134788]'
-
   return (
     <div className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -312,13 +309,14 @@ function JobCard({ job, onSelect }) {
           <p className="text-[11px] font-medium text-slate-400">{job.salaryLabel}</p>
           <p className="text-sm font-extrabold text-slate-800">{job.salary}</p>
         </div>
-        <button
-          type="button"
+        <Button
           onClick={onSelect}
-          className={`shrink-0 rounded-lg px-4 py-2 text-xs font-bold text-white transition-colors ${buttonClass}`}
+          variant={job.buttonTone === 'dark' ? 'primaryDark' : 'primary'}
+          size="sm"
+          className="shrink-0"
         >
           Ver detalle y postularme
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -344,14 +342,7 @@ export default function Vacantes({ onLogin, onSelectJob, onHome }) {
       {/* Buscador */}
       <section className="mx-auto -mt-6 max-w-7xl px-4 sm:px-8">
         <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-lg shadow-slate-900/5 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
-          <div className="relative">
-            <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Ej: Odontólogo, Psicólogo, RIPS…"
-              className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-            />
-          </div>
+          <IconField icon={IconSearch} type="text" placeholder="Ej: Odontólogo, Psicólogo, RIPS…" />
           <div className="relative">
             <IconMapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <select className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-8 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20 sm:w-56">
@@ -374,13 +365,10 @@ export default function Vacantes({ onLogin, onSelectJob, onHome }) {
               <option>Administrativa</option>
             </select>
           </div>
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 rounded-lg bg-[#1654a3] px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#134788]"
-          >
+          <Button size="lg">
             <IconSearch className="h-4 w-4" />
             Buscar
-          </button>
+          </Button>
         </div>
         <div className="mt-8 flex flex-wrap gap-8">
             {STATS.map(({ icon: Icon, value, label }) => (
@@ -466,20 +454,10 @@ export default function Vacantes({ onLogin, onSelectJob, onHome }) {
                 Recibe vacantes compatibles en tu WhatsApp o correo institucional.
               </p>
               <div className="flex flex-col gap-2">
-                <div className="relative">
-                  <IconMail className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="email"
-                    placeholder="Ingresa tu correo"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-3 text-xs text-slate-700 placeholder:text-slate-400 outline-none focus:border-[#0ca3c5] focus:ring-2 focus:ring-[#0ca3c5]/20"
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="rounded-lg bg-[#0ca3c5] py-2 text-xs font-bold text-white transition-colors hover:bg-[#0b8fac]"
-                >
+                <IconField icon={IconMail} type="email" placeholder="Ingresa tu correo" size="sm" focusColor="teal" />
+                <Button variant="teal" size="sm">
                   Activar Alerta
-                </button>
+                </Button>
               </div>
             </div>
           </aside>
@@ -641,20 +619,12 @@ export default function Vacantes({ onLogin, onSelectJob, onHome }) {
             ¿No encuentras la vacante específica para tu perfil?
           </h2>
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={onLogin}
-              className="rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-[#1654a3] transition-colors hover:bg-blue-50"
-            >
+            <Button variant="white" onClick={onLogin}>
               Registrar mi Hoja de Vida
-            </button>
-            <button
-              type="button"
-              onClick={onLogin}
-              className="rounded-lg border border-white/40 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-white/10"
-            >
+            </Button>
+            <Button variant="whiteOutline" onClick={onLogin}>
               Consultar Estado de Selección
-            </button>
+            </Button>
           </div>
         </div>
       </section>

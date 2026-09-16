@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import SiteHeader from '../../shared/SiteHeader'
-import SiteFooter from '../../shared/SiteFooter'
+import SiteHeader from '../../components/SiteHeader'
+import SiteFooter from '../../components/SiteFooter'
+import Button from '../../components/Button'
 import {
   IconArrowLeft,
   IconMapPin,
@@ -8,7 +9,7 @@ import {
   IconBuilding,
   IconCheck,
   IconUserPlus,
-} from '../../shared/icons'
+} from '../../components/icons'
 
 const APPLICATION_STAGES = [
   'Postulación',
@@ -136,14 +137,10 @@ export default function VacanteDetalle({ job, onBack, onLogin }) {
             </div>
 
             {!applied ? (
-              <button
-                type="button"
-                onClick={() => setApplied(true)}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#1654a3] py-3 text-sm font-bold text-white transition-colors hover:bg-[#134788]"
-              >
+              <Button onClick={() => setApplied(true)} size="lg" fullWidth className="mt-6">
                 <IconUserPlus className="h-4 w-4" />
                 Postularme a esta vacante
-              </button>
+              </Button>
             ) : (
               <div className="mt-6 rounded-lg border border-[#0ca3c5]/30 bg-[#0ca3c5]/5 p-4">
                 <p className="flex items-center gap-2 text-sm font-bold text-[#0b8fac]">

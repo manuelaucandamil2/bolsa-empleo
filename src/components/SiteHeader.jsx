@@ -1,4 +1,5 @@
 import logo from '../assets/logo-preventiva.png'
+import Button from './Button'
 import { IconHeadset, IconGlobe } from './icons'
 
 const NAV_LINKS = [
@@ -42,13 +43,9 @@ export default function SiteHeader({ onLogin, onHome }) {
           >
             Acceso Gestión Humana
           </button>
-          <button
-            type="button"
-            onClick={onLogin}
-            className="rounded-lg bg-[#1654a3] px-4 py-2 font-bold text-white transition-colors hover:bg-[#134788]"
-          >
+          <Button onClick={onLogin} size="sm">
             Ingreso Candidatos
-          </button>
+          </Button>
         </div>
       </div>
     </header>

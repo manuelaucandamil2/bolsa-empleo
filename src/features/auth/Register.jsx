@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { BRAND } from '../../shared/brand'
+import { BRAND } from '../../components/brand'
 import logo from '../../assets/logo-preventiva.png'
+import Button from '../../components/Button'
+import IconField from '../../components/IconField'
 import {
   IconArrowLeft,
   IconHeadset,
@@ -15,7 +17,7 @@ import {
   IconCheck,
   IconUserPlus,
   IconLogin,
-} from '../../shared/icons'
+} from '../../components/icons'
 
 const HIGHLIGHTS = [
   'Regístrate en menos de 5 minutos',
@@ -140,18 +142,15 @@ export default function Register({ onBackToLogin }) {
                 <label htmlFor="fullName" className="mb-1.5 block text-sm font-semibold text-slate-700">
                   Nombres y Apellidos <span className="text-[#ee7128]">*</span>
                 </label>
-                <div className="relative">
-                  <IconUser className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="fullName"
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Ej: Laura Andrea Gómez Pérez"
-                    className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                  />
-                </div>
+                <IconField
+                  icon={IconUser}
+                  id="fullName"
+                  type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Ej: Laura Andrea Gómez Pérez"
+                />
               </div>
 
               {/* Documento */}
@@ -176,18 +175,15 @@ export default function Register({ onBackToLogin }) {
                   <label htmlFor="document" className="mb-1.5 block text-sm font-semibold text-slate-700">
                     Número de Documento <span className="text-[#ee7128]">*</span>
                   </label>
-                  <div className="relative">
-                    <IconIdCard className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="document"
-                      type="text"
-                      required
-                      value={document}
-                      onChange={(e) => setDocument(e.target.value)}
-                      placeholder="Ej: 1020345678"
-                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                    />
-                  </div>
+                  <IconField
+                    icon={IconIdCard}
+                    id="document"
+                    type="text"
+                    required
+                    value={document}
+                    onChange={(e) => setDocument(e.target.value)}
+                    placeholder="Ej: 1020345678"
+                  />
                 </div>
               </div>
 
@@ -197,35 +193,29 @@ export default function Register({ onBackToLogin }) {
                   <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">
                     Correo Electrónico <span className="text-[#ee7128]">*</span>
                   </label>
-                  <div className="relative">
-                    <IconMail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tu.correo@ejemplo.com"
-                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                    />
-                  </div>
+                  <IconField
+                    icon={IconMail}
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu.correo@ejemplo.com"
+                  />
                 </div>
                 <div>
                   <label htmlFor="phone" className="mb-1.5 block text-sm font-semibold text-slate-700">
                     Celular de Contacto <span className="text-[#ee7128]">*</span>
                   </label>
-                  <div className="relative">
-                    <IconPhone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="phone"
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="300 123 4567"
-                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                    />
-                  </div>
+                  <IconField
+                    icon={IconPhone}
+                    id="phone"
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="300 123 4567"
+                  />
                 </div>
               </div>
 
@@ -235,53 +225,51 @@ export default function Register({ onBackToLogin }) {
                   <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-slate-700">
                     Contraseña <span className="text-[#ee7128]">*</span>
                   </label>
-                  <div className="relative">
-                    <IconLock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength={8}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Mínimo 8 caracteres"
-                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    >
-                      {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                    </button>
-                  </div>
+                  <IconField
+                    icon={IconLock}
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Mínimo 8 caracteres"
+                    rightElement={
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                      </button>
+                    }
+                  />
                 </div>
                 <div>
                   <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-semibold text-slate-700">
                     Confirmar Contraseña <span className="text-[#ee7128]">*</span>
                   </label>
-                  <div className="relative">
-                    <IconLock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      required
-                      minLength={8}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Repite tu contraseña"
-                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword((v) => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    >
-                      {showConfirmPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
-                    </button>
-                  </div>
+                  <IconField
+                    icon={IconLock}
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repite tu contraseña"
+                    rightElement={
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword((v) => !v)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        {showConfirmPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                      </button>
+                    }
+                  />
                 </div>
               </div>
 
@@ -306,26 +294,19 @@ export default function Register({ onBackToLogin }) {
               </label>
 
               {/* Submit */}
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1654a3] py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#134788]"
-              >
+              <Button type="submit" size="lg" fullWidth>
                 Crear mi cuenta
                 <IconUserPlus className="h-4 w-4" />
-              </button>
+              </Button>
             </form>
 
             {/* Volver a login */}
             <div className="mt-auto border-t border-slate-100 pt-6 text-center">
               <p className="text-sm text-slate-500">¿Ya tienes una cuenta?</p>
-              <button
-                type="button"
-                onClick={onBackToLogin}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 sm:w-auto sm:px-6"
-              >
+              <Button variant="outline" onClick={onBackToLogin} className="mt-3 w-full sm:w-auto">
                 <IconLogin className="h-4 w-4" />
                 Inicia sesión
-              </button>
+              </Button>
             </div>
           </section>
         </div>
