@@ -1,6 +1,8 @@
+import { useNavigate, Link } from 'react-router-dom'
+import { useApp } from '../app/AppContext'
 import logo from '../assets/logo-preventiva.png'
 import Button from './Button'
-import { IconHeadset, IconGlobe } from './icons'
+import { IconHeadset, IconGlobe, IconUser } from './icons'
 
 const NAV_LINKS = [
   { label: 'Vacantes Disponibles', active: true },
@@ -8,13 +10,16 @@ const NAV_LINKS = [
   { label: 'Sobre Nosotros', active: false },
 ]
 
-export default function SiteHeader({ onLogin, onHome }) {
+export default function SiteHeader() {
+  const navigate = useNavigate()
+  const { session } = useApp()
+
   return (
     <header className="border-b border-black/5 bg-white px-4 py-2 sm:px-8">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
-        <button type="button" onClick={onHome} className="shrink-0">
+        <Link to="/" className="shrink-0">
           <img src={logo} alt="Preventiva Salud IPS" className="h-16 w-auto" />
-        </button>
+        </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-semibold lg:flex">
           {NAV_LINKS.map((link) => (
@@ -36,16 +41,25 @@ export default function SiteHeader({ onLogin, onHome }) {
             <IconGlobe className="h-4 w-4" />
             ES
           </button>
-          <button
-            type="button"
-            onClick={onLogin}
-            className="hidden font-semibold text-slate-600 hover:text-[#1654a3] md:inline"
-          >
-            Acceso Gestión Humana
-          </button>
-          <Button onClick={onLogin} size="sm">
-            Ingreso Candidatos
-          </Button>
+          {session?.role === 'candidato' ? (
+            <Button onClick={() => navigate('/perfil')} size="sm" variant="outline">
+              <IconUser className="h-3.5 w-3.5" />
+              Mi Perfil
+            </Button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="hidden font-semibold text-slate-600 hover:text-[#1654a3] md:inline"
+              >
+                Acceso Gestión Humana
+              </button>
+              <Button onClick={() => navigate('/login')} size="sm">
+                Ingreso Candidatos
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>

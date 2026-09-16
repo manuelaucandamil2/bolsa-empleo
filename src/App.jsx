@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AppProvider } from './app/AppContext'
+import ScrollToTop from './app/ScrollToTop'
 import Vacantes from './features/vacantes/Vacantes'
 import VacanteDetalle from './features/vacantes/VacanteDetalle'
 import Login from './features/auth/Login'
@@ -7,52 +9,19 @@ import Perfil from './features/perfil/Perfil'
 import './App.css'
 
 function App() {
-  const [view, setView] = useState('vacantes')
-  const [selectedJob, setSelectedJob] = useState(null)
-
-  if (view === 'login') {
-    return (
-      <Login
-        onCreateAccount={() => setView('register')}
-        onBackToJobs={() => setView('vacantes')}
-        onLoginSuccess={() => setView('perfil')}
-      />
-    )
-  }
-
-  if (view === 'register') {
-    return (
-      <Register
-        onBackToLogin={() => setView('login')}
-        onHome={() => setView('vacantes')}
-        onRegisterSuccess={() => setView('perfil')}
-      />
-    )
-  }
-
-  if (view === 'perfil') {
-    return <Perfil onLogin={() => setView('login')} onHome={() => setView('vacantes')} />
-  }
-
-  if (view === 'detalle') {
-    return (
-      <VacanteDetalle
-        job={selectedJob}
-        onBack={() => setView('vacantes')}
-        onLogin={() => setView('login')}
-      />
-    )
-  }
-
   return (
-    <Vacantes
-      onLogin={() => setView('login')}
-      onHome={() => setView('vacantes')}
-      onSelectJob={(job) => {
-        setSelectedJob(job)
-        setView('detalle')
-      }}
-    />
+    <BrowserRouter>
+      <AppProvider>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Vacantes />} />
+          <Route path="/vacantes/:jobId" element={<VacanteDetalle />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Register />} />
+          <Route path="/perfil" element={<Perfil />} />
+        </Routes>
+      </AppProvider>
+    </BrowserRouter>
   )
 }
 

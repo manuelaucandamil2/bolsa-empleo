@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useApp } from '../../app/AppContext'
 import SiteHeader from '../../components/SiteHeader'
 import SiteFooter from '../../components/SiteFooter'
 import Button from '../../components/Button'
 import IconField from '../../components/IconField'
 import {
+  IconArrowLeft,
   IconUser,
   IconMail,
   IconPhone,
@@ -65,10 +68,6 @@ function updateListItem(list, setList, id, field, value) {
   setList(list.map((item) => (item.id === id ? { ...item, [field]: value } : item)))
 }
 
-const APPLICATIONS = [
-  { vacante: 'Odontólogo(a) General - Sede Norte', fecha: '2026-09-10', estado: 'En proceso', etapa: 'Entrevista' },
-  { vacante: 'Especialista en Ortodoncia y Ortopedia Maxilar', fecha: '2026-08-22', estado: 'En proceso', etapa: 'Revisión de hoja de vida' },
-]
 
 function SectionCard({ icon: Icon, title, action, children }) {
   return (
@@ -85,7 +84,9 @@ function SectionCard({ icon: Icon, title, action, children }) {
   )
 }
 
-export default function Perfil({ onLogin, onHome }) {
+export default function Perfil() {
+  const navigate = useNavigate()
+  const { applications } = useApp()
   const [personal, setPersonal] = useState(INITIAL_PERSONAL)
   const [cvFile, setCvFile] = useState(null)
   const [education, setEducation] = useState(INITIAL_EDUCATION)
@@ -131,9 +132,18 @@ export default function Perfil({ onLogin, onHome }) {
 
   return (
     <div className="min-h-screen bg-[#f5f8fc]">
-      <SiteHeader onLogin={onLogin} onHome={onHome} />
+      <SiteHeader />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1654a3] hover:text-[#0ca3c5]"
+        >
+          <IconArrowLeft className="h-4 w-4" />
+          Volver a Vacantes
+        </button>
+
         {/* Encabezado de perfil */}
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -464,8 +474,8 @@ export default function Perfil({ onLogin, onHome }) {
             {/* Mis postulaciones */}
             <SectionCard icon={IconClock} title="Mis Postulaciones">
               <div className="flex flex-col gap-4">
-                {APPLICATIONS.map((app) => (
-                  <div key={app.vacante} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                {applications.map((app) => (
+                  <div key={app.jobId ?? app.vacante} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
                     <p className="text-sm font-bold text-slate-800">{app.vacante}</p>
                     <p className="mt-1 text-xs text-slate-500">Postulado el {app.fecha}</p>
                     <div className="mt-2 flex items-center justify-between">
@@ -476,7 +486,7 @@ export default function Perfil({ onLogin, onHome }) {
                     </div>
                   </div>
                 ))}
-                {APPLICATIONS.length === 0 && (
+                {applications.length === 0 && (
                   <p className="text-sm text-slate-400">Aún no te has postulado a ninguna vacante.</p>
                 )}
               </div>

@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import SiteHeader from '../../components/SiteHeader'
 import SiteFooter from '../../components/SiteFooter'
 import Button from '../../components/Button'
+import { useApp } from '../../app/AppContext'
+import { JOBS } from './jobsData'
 import {
   IconArrowLeft,
   IconMapPin,
@@ -28,19 +30,37 @@ const BADGE_STYLES = {
   priority: 'bg-[#7b4c9e]/10 text-[#7b4c9e]',
 }
 
-export default function VacanteDetalle({ job, onBack, onLogin }) {
-  const [applied, setApplied] = useState(false)
+export default function VacanteDetalle() {
+  const { jobId } = useParams()
+  const navigate = useNavigate()
+  const { hasApplied, applyToJob } = useApp()
 
-  if (!job) return null
+  const job = JOBS.find((j) => j.id === jobId)
+  const applied = job ? hasApplied(job.id) : false
+
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-[#f5f8fc]">
+        <SiteHeader />
+        <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-8">
+          <p className="text-lg font-bold text-slate-700">Esta vacante ya no está disponible.</p>
+          <Button className="mt-4" onClick={() => navigate('/')}>
+            Volver a Vacantes Disponibles
+          </Button>
+        </div>
+        <SiteFooter />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f8fc]">
-      <SiteHeader onLogin={onLogin} onHome={onBack} />
+      <SiteHeader />
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 text-sm font-semibold text-[#1654a3] hover:text-[#0ca3c5]"
         >
           <IconArrowLeft className="h-4 w-4" />
@@ -137,10 +157,15 @@ export default function VacanteDetalle({ job, onBack, onLogin }) {
             </div>
 
             {!applied ? (
-              <Button onClick={() => setApplied(true)} size="lg" fullWidth className="mt-6">
-                <IconUserPlus className="h-4 w-4" />
-                Postularme a esta vacante
-              </Button>
+              <>
+                <Button onClick={() => applyToJob(job)} size="lg" fullWidth className="mt-6">
+                  <IconUserPlus className="h-4 w-4" />
+                  Postularme a esta vacante
+                </Button>
+                <p className="mt-4 text-center text-[11px] text-slate-400">
+                  Necesitas una cuenta de candidato para postularte.
+                </p>
+              </>
             ) : (
               <div className="mt-6 rounded-lg border border-[#0ca3c5]/30 bg-[#0ca3c5]/5 p-4">
                 <p className="flex items-center gap-2 text-sm font-bold text-[#0b8fac]">
@@ -167,10 +192,6 @@ export default function VacanteDetalle({ job, onBack, onLogin }) {
                 </ol>
               </div>
             )}
-
-            <p className="mt-4 text-center text-[11px] text-slate-400">
-              Necesitas una cuenta de candidato para postularte.
-            </p>
           </aside>
         </div>
       </div>

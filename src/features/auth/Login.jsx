@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useApp } from '../../app/AppContext'
 import { BRAND } from '../../components/brand'
 import logo from '../../assets/logo-preventiva.png'
 import Button from '../../components/Button'
@@ -24,7 +26,9 @@ const HIGHLIGHTS = [
   'Validación segura de credenciales médicas',
 ]
 
-export default function Login({ onCreateAccount, onBackToJobs, onLoginSuccess }) {
+export default function Login() {
+  const navigate = useNavigate()
+  const { login } = useApp()
   const [role, setRole] = useState('candidato')
   const [docType, setDocType] = useState('CC')
   const [identifier, setIdentifier] = useState('')
@@ -35,7 +39,8 @@ export default function Login({ onCreateAccount, onBackToJobs, onLoginSuccess })
   function handleSubmit(e) {
     e.preventDefault()
     // TODO: conectar con el servicio de autenticación
-    onLoginSuccess?.()
+    login(role)
+    navigate('/')
   }
 
   return (
@@ -44,7 +49,7 @@ export default function Login({ onCreateAccount, onBackToJobs, onLoginSuccess })
       <header className="flex items-center justify-between gap-4 border-b border-black/5 bg-white px-4 py-3 sm:px-8">
         <button
           type="button"
-          onClick={onBackToJobs}
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 text-sm font-semibold text-[#1654a3] hover:text-[#0ca3c5] transition-colors"
         >
           <IconArrowLeft className="h-4 w-4" />
@@ -241,7 +246,7 @@ export default function Login({ onCreateAccount, onBackToJobs, onLoginSuccess })
               <p className="text-sm text-slate-500">
                 ¿Aún no tienes cuenta? Postúlate y haz parte del equipo médico.
               </p>
-              <Button variant="accentOutline" onClick={onCreateAccount} className="mt-3 w-full sm:w-auto">
+              <Button variant="accentOutline" onClick={() => navigate('/registro')} className="mt-3 w-full sm:w-auto">
                 <IconUserPlus className="h-4 w-4" />
                 Crear cuenta y cargar hoja de vida
               </Button>

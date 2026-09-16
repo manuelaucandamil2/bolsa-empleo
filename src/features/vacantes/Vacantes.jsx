@@ -1,16 +1,18 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useApp } from '../../app/AppContext'
 import { BRAND } from '../../components/brand'
 import SiteHeader from '../../components/SiteHeader'
 import SiteFooter from '../../components/SiteFooter'
 import Button from '../../components/Button'
 import IconField from '../../components/IconField'
+import JobCard from './JobCard'
+import { JOBS } from './jobsData'
 import {
   IconUsers,
   IconBriefcase,
   IconSearch,
   IconMapPin,
-  IconClock,
-  IconBuilding,
   IconChevronLeft,
   IconChevronRight,
   IconArrowRight,
@@ -25,7 +27,11 @@ import {
   IconSmile,
   IconAward,
   IconMail,
+  IconBookmark,
+  IconEye,
 } from '../../components/icons'
+
+const CANDIDATE_NAME = 'Laura'
 
 const STATS = [
   { icon: IconBriefcase, value: '45+', label: 'Convocatorias abiertas' },
@@ -54,163 +60,6 @@ const EXPERIENCE_FILTERS = [
   { label: 'Sin experiencia / Rural (SSO)', defaultChecked: true },
   { label: '1 a 3 años de experiencia', defaultChecked: true },
   { label: 'Más de 4 años / Especialista', defaultChecked: false },
-]
-
-const JOBS = [
-  {
-    id: 'odontologo-general-norte',
-    category: 'Odontología IPS',
-    badge: { text: 'Publicado hoy', tone: 'neutral' },
-    title: 'Odontólogo(a) General - Sede Norte',
-    location: 'Bogotá D.C. (Sede Pepe Sierra)',
-    schedule: 'Término indefinido',
-    modality: 'Presencial',
-    description:
-      'Requisitos: Registro RETHUS vigente, tarjeta profesional, experiencia mínima de 2 años en operativa, prótesis fija y…',
-    responsibilities: [
-      'Atención odontológica general a pacientes adscritos al plan de salud.',
-      'Diagnóstico, tratamiento y seguimiento de procedimientos de operatoria y prótesis fija.',
-      'Registro clínico conforme a la normativa vigente de historia clínica.',
-    ],
-    requirements: [
-      'Título profesional en Odontología con tarjeta profesional vigente.',
-      'Registro RETHUS activo.',
-      'Mínimo 2 años de experiencia en consulta general.',
-      'Disponibilidad para laborar en Sede Norte, Bogotá.',
-    ],
-    tags: ['Bono bienestar', 'Póliza de Salud', 'Capacitación'],
-    salaryLabel: 'Asignación Salarial',
-    salary: '$5.200.000 COP',
-    buttonTone: 'blue',
-  },
-  {
-    id: 'psicologo-clinico-preventivamente',
-    category: 'Salud Mental - Preventivamente',
-    badge: { text: 'Urgente', tone: 'urgent' },
-    title: 'Psicólogo(a) Clínico - Clínica Preventivamente',
-    location: 'Medellín (Sede El Poblado)',
-    schedule: 'Tiempo Completo',
-    modality: 'Presencial',
-    description:
-      'Atención terapéutica individual y grupal, elaboración de planes de intervención cognitivo-conductual. Tarjeta profesional al día…',
-    responsibilities: [
-      'Atención terapéutica individual y grupal a pacientes remitidos.',
-      'Elaboración de planes de intervención cognitivo-conductual.',
-      'Participación en juntas clínicas interdisciplinarias.',
-    ],
-    requirements: [
-      'Título profesional en Psicología con énfasis clínico.',
-      'Tarjeta profesional vigente.',
-      'Experiencia mínima de 1 año en atención clínica.',
-      'Disponibilidad de tiempo completo en Sede El Poblado, Medellín.',
-    ],
-    tags: ['Horario Flexible', 'Supervisión Clínica'],
-    salaryLabel: 'Remuneración Fija',
-    salary: '$4.500.000 COP',
-    buttonTone: 'dark',
-  },
-  {
-    id: 'medico-general-consulta-externa',
-    category: 'Medicina General',
-    badge: { text: '3 Vacantes', tone: 'neutral' },
-    title: 'Médico(a) General de Consulta Externa',
-    location: 'Cali (Sede San Fernando)',
-    schedule: 'Turnos Rotativos',
-    modality: 'Contrato Directo',
-    description:
-      'Consulta programada y prioritaria para usuarios adscritos al plan complementario. Formación médica continuada certificada y…',
-    responsibilities: [
-      'Consulta médica programada y prioritaria a usuarios del plan complementario.',
-      'Formulación y seguimiento de tratamientos según guías clínicas vigentes.',
-      'Remisión oportuna a especialidades cuando se requiera.',
-    ],
-    requirements: [
-      'Título profesional en Medicina con Registro Médico vigente.',
-      'Disponibilidad para turnos rotativos.',
-      'Deseable experiencia previa en consulta externa.',
-      'RCP básico vigente.',
-    ],
-    tags: ['Póliza Jurídica 100%', 'Alimentación Sede'],
-    salaryLabel: 'Salario base + recargos',
-    salary: '$6.800.000 COP',
-    buttonTone: 'blue',
-  },
-  {
-    id: 'jefe-enfermeria-coordinacion',
-    category: 'Enfermería Asistencial',
-    badge: { text: 'Hace 2 días', tone: 'neutral' },
-    title: 'Jefe de Enfermería / Coordinación Asistencial',
-    location: 'Barranquilla (Sede Prado)',
-    schedule: 'Horario Fijo Diurno',
-    modality: 'Presencial',
-    description:
-      'Supervisión del equipo de auxiliares, gestión de inventarios de bioseguridad, administración segura de medicamentos y…',
-    responsibilities: [
-      'Supervisión del equipo de auxiliares de enfermería.',
-      'Gestión de inventarios de bioseguridad e insumos médicos.',
-      'Administración segura de medicamentos conforme a protocolos institucionales.',
-    ],
-    requirements: [
-      'Título profesional en Enfermería con tarjeta profesional vigente.',
-      'Experiencia mínima de 3 años en coordinación asistencial.',
-      'Conocimientos en gestión de calidad en salud.',
-    ],
-    tags: ['Auxilio de Movilidad', 'Convenios Educativos'],
-    salaryLabel: 'Salario Integral',
-    salary: '$3.800.000 COP',
-    buttonTone: 'blue',
-  },
-  {
-    id: 'auxiliar-facturacion-ips',
-    category: 'Administración en Salud',
-    badge: { text: 'Activa', tone: 'active' },
-    title: 'Auxiliar Administrativo de Facturación IPS',
-    location: 'Bucaramanga (Sede Cabecera)',
-    schedule: 'Lunes a Viernes',
-    modality: 'Presencial',
-    description:
-      'Generación y validación de RIPS conforme a normativa vigente del Ministerio de Salud, radicación electrónica ante EPS y gestión…',
-    responsibilities: [
-      'Generación y validación de RIPS conforme a normativa del Ministerio de Salud.',
-      'Radicación electrónica de cuentas ante EPS.',
-      'Gestión de glosas y respuesta a requerimientos de auditoría.',
-    ],
-    requirements: [
-      'Técnico o tecnólogo en áreas administrativas o de salud.',
-      'Experiencia mínima de 1 año en facturación en salud.',
-      'Manejo de herramientas ofimáticas y software de facturación.',
-    ],
-    tags: ['Teletrabajo 1 día/sem', 'Caja de Compensación'],
-    salaryLabel: 'Salario Base Legal',
-    salary: '$2.100.000 COP',
-    buttonTone: 'blue',
-  },
-  {
-    id: 'especialista-ortodoncia-ortopedia',
-    category: 'Odontología Especializada',
-    badge: { text: 'Cupo Prioritario', tone: 'priority' },
-    title: 'Especialista en Ortodoncia y Ortopedia Maxilar',
-    location: 'Bogotá D.C. (Sedes Chapinero y Suba)',
-    schedule: 'Por Honorarios / Fracciones',
-    modality: 'Presencial',
-    description:
-      'Manejo de aparatología fija, ortopedia y alineadores invisibles. Infraestructura digital de escaneo intraoral disponible en sede…',
-    responsibilities: [
-      'Diagnóstico y planeación de tratamientos de ortodoncia y ortopedia maxilar.',
-      'Manejo de aparatología fija y alineadores invisibles.',
-      'Uso de escaneo intraoral 3D para seguimiento de tratamientos.',
-    ],
-    requirements: [
-      'Especialización en Ortodoncia y Ortopedia Maxilar.',
-      'Tarjeta profesional y RETHUS vigentes.',
-      'Experiencia mínima de 2 años como especialista.',
-      'Disponibilidad por honorarios/fracciones en sedes Chapinero y Suba.',
-    ],
-    tags: ['Flujo Seguro Pacientes', 'Scanner 3D en Sede'],
-    salaryLabel: 'Esquema Tarifario',
-    salary: 'Porcentaje Competitivo',
-    buttonTone: 'blue',
-  },
 ]
 
 const SPECIALTIES = [
@@ -242,13 +91,6 @@ const BENEFITS = [
 ]
 
 
-const BADGE_STYLES = {
-  neutral: 'bg-slate-100 text-slate-600',
-  urgent: 'bg-[#ee7128]/10 text-[#ee7128]',
-  active: 'bg-[#0ca3c5]/10 text-[#0ca3c5]',
-  priority: 'bg-[#7b4c9e]/10 text-[#7b4c9e]',
-}
-
 function FilterCheckbox({ label, count, defaultChecked }) {
   return (
     <label className="flex items-center justify-between gap-2 text-sm text-slate-600">
@@ -265,70 +107,54 @@ function FilterCheckbox({ label, count, defaultChecked }) {
   )
 }
 
-function JobCard({ job, onSelect }) {
-  return (
-    <div className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <span className="rounded-md bg-[#1654a3]/10 px-2.5 py-1 text-xs font-bold text-[#1654a3]">
-          {job.category}
-        </span>
-        <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${BADGE_STYLES[job.badge.tone]}`}>
-          {job.badge.text}
-        </span>
-      </div>
-
-      <h3 className="text-base font-extrabold text-slate-800">{job.title}</h3>
-
-      <div className="mt-2 flex flex-col gap-1 text-xs text-slate-500">
-        <span className="flex items-center gap-1.5">
-          <IconMapPin className="h-3.5 w-3.5 shrink-0" />
-          {job.location}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <IconClock className="h-3.5 w-3.5 shrink-0" />
-          {job.schedule}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <IconBuilding className="h-3.5 w-3.5 shrink-0" />
-          {job.modality}
-        </span>
-      </div>
-
-      <p className="mt-3 text-xs leading-relaxed text-slate-500">{job.description}</p>
-
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {job.tags.map((tag) => (
-          <span key={tag} className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-4 flex items-end justify-between gap-3 border-t border-slate-100 pt-4">
-        <div>
-          <p className="text-[11px] font-medium text-slate-400">{job.salaryLabel}</p>
-          <p className="text-sm font-extrabold text-slate-800">{job.salary}</p>
-        </div>
-        <Button
-          onClick={onSelect}
-          variant={job.buttonTone === 'dark' ? 'primaryDark' : 'primary'}
-          size="sm"
-          className="shrink-0"
-        >
-          Ver detalle y postularme
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-export default function Vacantes({ onLogin, onSelectJob, onHome }) {
+export default function Vacantes() {
+  const navigate = useNavigate()
+  const { session, applications } = useApp()
   const [page, setPage] = useState(1)
   const totalPages = 8
+  const isCandidate = session?.role === 'candidato'
+
+  const candidateStats = [
+    { icon: IconBriefcase, value: applications.length, label: 'Postulaciones activas' },
+    { icon: IconBookmark, value: 3, label: 'Vacantes guardadas' },
+    { icon: IconEye, value: 12, label: 'Vistas a tu perfil' },
+  ]
 
   return (
     <div className="min-h-screen bg-[#f5f8fc]">
-      <SiteHeader onLogin={onLogin} onHome={onHome} />
+      <SiteHeader />
+
+      {/* Bienvenida del candidato */}
+      {isCandidate && (
+        <section className="border-b border-black/5 bg-white">
+          <div className="mx-auto max-w-7xl px-4 py-5 sm:px-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-lg font-extrabold text-slate-800">Hola, {CANDIDATE_NAME} 👋</h1>
+                <p className="text-sm text-slate-500">
+                  Tienes {applications.length} postulaciones activas. Sigue explorando nuevas oportunidades.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-5">
+                {candidateStats.map(({ icon: Icon, value, label }) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#0ca3c5]/10 text-[#0ca3c5]">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-extrabold leading-none text-slate-800">{value}</p>
+                      <p className="text-[11px] text-slate-500">{label}</p>
+                    </div>
+                  </div>
+                ))}
+                <Button size="sm" variant="outline" onClick={() => navigate('/perfil')}>
+                  Ver mi perfil
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Hero */}
       <section className="border-b border-black/5 bg-white">
@@ -483,7 +309,7 @@ export default function Vacantes({ onLogin, onSelectJob, onHome }) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {JOBS.map((job) => (
-                <JobCard key={job.id} job={job} onSelect={() => onSelectJob(job)} />
+                <JobCard key={job.id} job={job} onSelect={() => navigate(`/vacantes/${job.id}`)} />
               ))}
             </div>
 
@@ -619,10 +445,10 @@ export default function Vacantes({ onLogin, onSelectJob, onHome }) {
             ¿No encuentras la vacante específica para tu perfil?
           </h2>
           <div className="flex flex-wrap gap-3">
-            <Button variant="white" onClick={onLogin}>
+            <Button variant="white" onClick={() => navigate('/login')}>
               Registrar mi Hoja de Vida
             </Button>
-            <Button variant="whiteOutline" onClick={onLogin}>
+            <Button variant="whiteOutline" onClick={() => navigate('/login')}>
               Consultar Estado de Selección
             </Button>
           </div>

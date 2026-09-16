@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useApp } from '../../app/AppContext'
 import SiteHeader from '../../components/SiteHeader'
 import SiteFooter from '../../components/SiteFooter'
 import Button from '../../components/Button'
@@ -95,9 +97,15 @@ function UploadRow({ label, file, onUpload, onRemove }) {
   )
 }
 
-export default function Register({ onBackToLogin, onHome, onRegisterSuccess }) {
+export default function Register() {
+  const navigate = useNavigate()
+  const { login } = useApp()
   const [step, setStep] = useState(1)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [step])
 
   const [form, setForm] = useState({
     docType: 'CC',
@@ -143,12 +151,13 @@ export default function Register({ onBackToLogin, onHome, onRegisterSuccess }) {
       return
     }
 
-    onRegisterSuccess?.()
+    login('candidato')
+    navigate('/')
   }
 
   return (
     <div className="min-h-screen bg-[#f5f8fc]">
-      <SiteHeader onLogin={onBackToLogin} onHome={onHome} />
+      <SiteHeader />
 
       <div className="mx-auto max-w-4xl px-4 py-10 sm:px-8">
         {/* Hero */}
@@ -165,7 +174,7 @@ export default function Register({ onBackToLogin, onHome, onRegisterSuccess }) {
           </p>
           <button
             type="button"
-            onClick={onBackToLogin}
+            onClick={() => navigate('/login')}
             className="mt-3 text-sm font-semibold text-[#1654a3] hover:underline"
           >
             ¿Ya tienes cuenta? Inicia sesión
