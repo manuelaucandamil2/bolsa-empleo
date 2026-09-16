@@ -24,7 +24,7 @@ const HIGHLIGHTS = [
   'Validación segura de credenciales médicas',
 ]
 
-export default function Login({ onCreateAccount, onBackToJobs }) {
+export default function Login({ onCreateAccount, onBackToJobs, onLoginSuccess }) {
   const [role, setRole] = useState('candidato')
   const [docType, setDocType] = useState('CC')
   const [identifier, setIdentifier] = useState('')
@@ -35,6 +35,7 @@ export default function Login({ onCreateAccount, onBackToJobs }) {
   function handleSubmit(e) {
     e.preventDefault()
     // TODO: conectar con el servicio de autenticación
+    onLoginSuccess?.()
   }
 
   return (

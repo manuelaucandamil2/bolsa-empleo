@@ -3,6 +3,7 @@ import Vacantes from './features/vacantes/Vacantes'
 import VacanteDetalle from './features/vacantes/VacanteDetalle'
 import Login from './features/auth/Login'
 import Register from './features/auth/Register'
+import Perfil from './features/perfil/Perfil'
 import './App.css'
 
 function App() {
@@ -10,11 +11,27 @@ function App() {
   const [selectedJob, setSelectedJob] = useState(null)
 
   if (view === 'login') {
-    return <Login onCreateAccount={() => setView('register')} onBackToJobs={() => setView('vacantes')} />
+    return (
+      <Login
+        onCreateAccount={() => setView('register')}
+        onBackToJobs={() => setView('vacantes')}
+        onLoginSuccess={() => setView('perfil')}
+      />
+    )
   }
 
   if (view === 'register') {
-    return <Register onBackToLogin={() => setView('login')} />
+    return (
+      <Register
+        onBackToLogin={() => setView('login')}
+        onHome={() => setView('vacantes')}
+        onRegisterSuccess={() => setView('perfil')}
+      />
+    )
+  }
+
+  if (view === 'perfil') {
+    return <Perfil onLogin={() => setView('login')} onHome={() => setView('vacantes')} />
   }
 
   if (view === 'detalle') {
