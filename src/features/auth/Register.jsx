@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { BRAND } from '../brand'
+import { BRAND } from '../../shared/brand'
+import logo from '../../assets/logo-preventiva.png'
 import {
   IconArrowLeft,
   IconHeadset,
@@ -14,7 +15,7 @@ import {
   IconCheck,
   IconUserPlus,
   IconLogin,
-} from './icons'
+} from '../../shared/icons'
 
 const HIGHLIGHTS = [
   'Regístrate en menos de 5 minutos',
@@ -90,20 +91,10 @@ export default function Register({ onBackToLogin }) {
             }}
           >
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-2xl font-extrabold leading-none">
-                <span>Preventi</span>
-                <span className="relative">
-                  <span className="text-[#ee7128]">/</span>
-                  <span className="absolute -left-[2px] -top-1 text-[#0ca3c5]">·</span>
-                </span>
-                <span>a</span>
-                <span className="ml-1 flex flex-col text-[11px] font-bold leading-tight tracking-wide text-[#0ca3c5]">
-                  <span>Salud</span>
-                  <span>IPS</span>
-                </span>
-              </div>
-              <span className="rounded-md bg-[#ee7128] px-2.5 py-1 text-[11px] font-bold tracking-wide">
+            <div className="flex items-center gap-4 self-start rounded-xl bg-white/15 py-3 pl-4 pr-3 backdrop-blur-sm">
+              <img src={logo} alt="Preventiva Salud IPS" className="h-16 w-auto" />
+              <div className="h-12 w-px bg-white/25" />
+              <span className="rounded-md bg-[#ee7128] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white">
                 PORTAL EMPLEO
               </span>
             </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { BRAND } from '../brand'
+import { BRAND } from '../../shared/brand'
+import logo from '../../assets/logo-preventiva.png'
 import {
   IconArrowLeft,
   IconHeadset,
@@ -13,7 +14,7 @@ import {
   IconCheck,
   IconUserPlus,
   IconLogin,
-} from './icons'
+} from '../../shared/icons'
 
 const HIGHLIGHTS = [
   'Postulación en menos de 2 minutos',
@@ -21,7 +22,7 @@ const HIGHLIGHTS = [
   'Validación segura de credenciales médicas',
 ]
 
-export default function Login({ onCreateAccount }) {
+export default function Login({ onCreateAccount, onBackToJobs }) {
   const [role, setRole] = useState('candidato')
   const [docType, setDocType] = useState('CC')
   const [identifier, setIdentifier] = useState('')
@@ -38,14 +39,15 @@ export default function Login({ onCreateAccount }) {
     <div className="min-h-screen flex flex-col bg-[#eef2f7]">
       {/* Barra superior */}
       <header className="flex items-center justify-between gap-4 border-b border-black/5 bg-white px-4 py-3 sm:px-8">
-        <a
-          href="#"
+        <button
+          type="button"
+          onClick={onBackToJobs}
           className="flex items-center gap-2 text-sm font-semibold text-[#1654a3] hover:text-[#0ca3c5] transition-colors"
         >
           <IconArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Volver a Vacantes Disponibles</span>
           <span className="sm:hidden">Volver</span>
-        </a>
+        </button>
 
         <div className="flex items-center gap-4 text-sm text-slate-600">
           <div className="hidden items-center gap-2 md:flex">
@@ -78,20 +80,10 @@ export default function Login({ onCreateAccount }) {
             }}
           >
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-2xl font-extrabold leading-none">
-                <span>Preventi</span>
-                <span className="relative">
-                  <span className="text-[#ee7128]">/</span>
-                  <span className="absolute -left-[2px] -top-1 text-[#0ca3c5]">·</span>
-                </span>
-                <span>a</span>
-                <span className="ml-1 flex flex-col text-[11px] font-bold leading-tight tracking-wide text-[#0ca3c5]">
-                  <span>Salud</span>
-                  <span>IPS</span>
-                </span>
-              </div>
-              <span className="rounded-md bg-[#ee7128] px-2.5 py-1 text-[11px] font-bold tracking-wide">
+            <div className="flex items-center gap-4 self-start rounded-xl bg-white/15 py-3 pl-4 pr-3 backdrop-blur-sm">
+              <img src={logo} alt="Preventiva Salud IPS" className="h-16 w-auto" />
+              <div className="h-12 w-px bg-white/25" />
+              <span className="rounded-md bg-[#ee7128] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white">
                 PORTAL EMPLEO
               </span>
             </div>
