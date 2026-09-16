@@ -245,7 +245,7 @@ export default function Register() {
                     required
                     value={form.firstName}
                     onChange={(e) => update('firstName', e.target.value)}
-                    placeholder="Ej. Laura Marcela"
+                    placeholder="Ej. Manuela Marcela"
                   />
                 </div>
                 <div>
@@ -396,7 +396,7 @@ export default function Register() {
                     required
                     value={form.city}
                     onChange={(e) => update('city', e.target.value)}
-                    placeholder="Ej. Bogotá D.C."
+                    placeholder="Ej. Medellín"
                   />
                 </div>
 

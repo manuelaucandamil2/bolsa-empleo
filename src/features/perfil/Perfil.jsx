@@ -32,12 +32,12 @@ const TABS = [
 ]
 
 const INITIAL_PERSONAL = {
-  fullName: 'Laura Andrea Gómez Pérez',
+  fullName: 'Manuela Urrea Candamil',
   document: '1020345678',
   birthDate: '1996-04-12',
-  city: 'Bogotá D.C.',
+  city: 'Medellín',
   phone: '300 123 4567',
-  email: 'laura.gomez@ejemplo.com',
+  email: 'Manuela.urrea@ejemplo.com',
 }
 
 const INITIAL_EDUCATION = [

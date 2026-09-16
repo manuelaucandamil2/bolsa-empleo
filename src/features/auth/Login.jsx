@@ -62,8 +62,8 @@ export default function Login() {
             <IconHeadset className="h-4 w-4 text-[#1654a3]" />
             <span>
               Mesa de Ayuda Talento:{' '}
-              <a href="mailto:soporte.rrhh@preventivasalud.com" className="font-medium text-[#1654a3] hover:underline">
-                soporte.rrhh@preventivasalud.com
+              <a href="mailto:soporte@preventivasalud.com" className="font-medium text-[#1654a3] hover:underline">
+                soporte@preventivasalud.com
               </a>
             </span>
           </div>

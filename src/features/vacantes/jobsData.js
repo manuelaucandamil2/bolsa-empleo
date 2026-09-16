@@ -11,7 +11,7 @@ export const JOBS = [
     category: 'Odontología IPS',
     badge: { text: 'Publicado hoy', tone: 'neutral' },
     title: 'Odontólogo(a) General - Sede Norte',
-    location: 'Bogotá D.C. (Sede Pepe Sierra)',
+    location: 'Medellín (Sede Pepe Sierra)',
     schedule: 'Término indefinido',
     modality: 'Presencial',
     description:
@@ -139,7 +139,7 @@ export const JOBS = [
     category: 'Odontología Especializada',
     badge: { text: 'Cupo Prioritario', tone: 'priority' },
     title: 'Especialista en Ortodoncia y Ortopedia Maxilar',
-    location: 'Bogotá D.C. (Sedes Chapinero y Suba)',
+    location: 'Medellín (Sedes El poblado)',
     schedule: 'Por Honorarios / Fracciones',
     modality: 'Presencial',
     description:
@@ -153,7 +153,7 @@ export const JOBS = [
       'Especialización en Ortodoncia y Ortopedia Maxilar.',
       'Tarjeta profesional y RETHUS vigentes.',
       'Experiencia mínima de 2 años como especialista.',
-      'Disponibilidad por honorarios/fracciones en sedes Chapinero y Suba.',
+      'Disponibilidad por honorarios/fracciones en sedes El poblado.',
     ],
     tags: ['Flujo Seguro Pacientes', 'Scanner 3D en Sede'],
     salaryLabel: 'Esquema Tarifario',

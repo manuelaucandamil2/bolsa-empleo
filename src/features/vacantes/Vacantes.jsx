@@ -31,7 +31,7 @@ import {
   IconEye,
 } from '../../components/icons'
 
-const CANDIDATE_NAME = 'Laura'
+const CANDIDATE_NAME = 'Manuela'
 
 const STATS = [
   { icon: IconBriefcase, value: '45+', label: 'Convocatorias abiertas' },
@@ -156,24 +156,15 @@ export default function Vacantes() {
         </section>
       )}
 
-      {/* Hero */}
-      <section className="border-b border-black/5 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-8">
-          <span className="inline-block rounded-full bg-[#1654a3]/10 px-3 py-1 text-xs font-bold text-[#1654a3]">
-            Convocatoria Nacional de Talento Humano en Salud 2026
-          </span>
-        </div>
-      </section>
-
       {/* Buscador */}
-      <section className="mx-auto -mt-6 max-w-7xl px-4 sm:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
         <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-lg shadow-slate-900/5 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
           <IconField icon={IconSearch} type="text" placeholder="Ej: Odontólogo, Psicólogo, RIPS…" />
           <div className="relative">
             <IconMapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <select className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-8 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20 sm:w-56">
               <option>Todas las ciudades</option>
-              <option>Bogotá D.C.</option>
+              <option>Medellín</option>
               <option>Medellín</option>
               <option>Cali</option>
               <option>Barranquilla</option>
