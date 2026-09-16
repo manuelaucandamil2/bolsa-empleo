@@ -1,12 +1,9 @@
 import { useState } from 'react'
-import { BRAND } from '../../components/brand'
-import logo from '../../assets/logo-preventiva.png'
+import SiteHeader from '../../components/SiteHeader'
+import SiteFooter from '../../components/SiteFooter'
 import Button from '../../components/Button'
 import IconField from '../../components/IconField'
 import {
-  IconArrowLeft,
-  IconHeadset,
-  IconGlobe,
   IconIdCard,
   IconUser,
   IconMail,
@@ -16,223 +13,293 @@ import {
   IconEyeOff,
   IconCheck,
   IconUserPlus,
-  IconLogin,
+  IconShieldCheck,
+  IconHeadset,
+  IconArrowRight,
+  IconSave,
+  IconUpload,
+  IconX,
+  IconStethoscope,
+  IconMapPin,
 } from '../../components/icons'
 
-const HIGHLIGHTS = [
-  'Regístrate en menos de 5 minutos',
-  'Carga tu hoja de vida una sola vez',
-  'Postúlate a todas las vacantes disponibles',
+const STEPS = [
+  { n: 1, title: 'Datos Personales', desc: 'Identificación y contacto' },
+  { n: 2, title: 'Perfil en Salud & RETHUS', desc: 'Especialidad y registro' },
+  { n: 3, title: 'Soportes y Hoja de Vida', desc: 'Certificados y normatividad' },
 ]
 
-export default function Register({ onBackToLogin }) {
-  const [docType, setDocType] = useState('CC')
-  const [document, setDocument] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptsData, setAcceptsData] = useState(false)
+const EXPERIENCE_OPTIONS = ['Sin experiencia / Rural (SSO)', '1 a 3 años', '4 años o más / Especialista']
+
+function StepIndicator({ step }) {
+  return (
+    <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-3">
+      {STEPS.map((s) => {
+        const isActive = s.n === step
+        const isDone = s.n < step
+
+        let circleClass = 'bg-slate-100 text-slate-400'
+        if (isActive) {
+          circleClass = 'bg-[#1654a3] text-white'
+        } else if (isDone) {
+          circleClass = 'bg-[#0ca3c5] text-white'
+        }
+
+        return (
+          <div
+            key={s.n}
+            className={`flex items-center gap-3 rounded-lg p-3 ${isActive ? 'bg-[#1654a3]/5' : ''}`}
+          >
+            <span
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${circleClass}`}
+            >
+              {isDone ? <IconCheck className="h-4 w-4" /> : s.n}
+            </span>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Paso {s.n}</p>
+              <p className={`text-sm font-bold ${isActive ? 'text-[#1654a3]' : 'text-slate-700'}`}>{s.title}</p>
+              <p className="text-xs text-slate-400">{s.desc}</p>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function UploadRow({ label, file, onUpload, onRemove }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-4 py-3">
+      <div>
+        <p className="text-sm font-semibold text-slate-700">
+          {label} <span className="text-[#ee7128]">*</span>
+        </p>
+        {file && <p className="text-xs text-slate-500">{file}</p>}
+      </div>
+      {file ? (
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-slate-400 hover:text-red-500"
+          aria-label={`Quitar ${label}`}
+        >
+          <IconX className="h-4 w-4" />
+        </button>
+      ) : (
+        <Button type="button" size="sm" variant="outline" onClick={onUpload}>
+          <IconUpload className="h-3.5 w-3.5" />
+          Subir
+        </Button>
+      )}
+    </div>
+  )
+}
+
+export default function Register({ onBackToLogin, onHome, onRegisterSuccess }) {
+  const [step, setStep] = useState(1)
   const [error, setError] = useState('')
 
-  function handleSubmit(e) {
+  const [form, setForm] = useState({
+    docType: 'CC',
+    document: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    specialty: '',
+    city: '',
+    rethus: '',
+    license: '',
+    experience: EXPERIENCE_OPTIONS[0],
+  })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  const [documents, setDocuments] = useState({ cv: null, diploma: null, license: null, rethusCert: null })
+  const [acceptsData, setAcceptsData] = useState(false)
+
+  function update(field, value) {
+    setForm((f) => ({ ...f, [field]: value }))
+  }
+
+  function uploadDoc(field, filename) {
+    setDocuments((d) => ({ ...d, [field]: filename }))
+  }
+
+  function handleStepSubmit(e) {
     e.preventDefault()
-    if (password !== confirmPassword) {
+
+    if (step === 1 && form.password !== form.confirmPassword) {
       setError('Las contraseñas no coinciden.')
       return
     }
+
     setError('')
-    // TODO: conectar con el servicio de registro
+
+    if (step < 3) {
+      setStep(step + 1)
+      return
+    }
+
+    onRegisterSuccess?.()
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#eef2f7]">
-      {/* Barra superior */}
-      <header className="flex items-center justify-between gap-4 border-b border-black/5 bg-white px-4 py-3 sm:px-8">
-        <button
-          type="button"
-          onClick={onBackToLogin}
-          className="flex items-center gap-2 text-sm font-semibold text-[#1654a3] hover:text-[#0ca3c5] transition-colors"
-        >
-          <IconArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Volver a Iniciar Sesión</span>
-          <span className="sm:hidden">Volver</span>
-        </button>
+    <div className="min-h-screen bg-[#f5f8fc]">
+      <SiteHeader onLogin={onBackToLogin} onHome={onHome} />
 
-        <div className="flex items-center gap-4 text-sm text-slate-600">
-          <div className="hidden items-center gap-2 md:flex">
-            <IconHeadset className="h-4 w-4 text-[#1654a3]" />
-            <span>
-              Mesa de Ayuda Talento:{' '}
-              <a href="mailto:soporte.rrhh@preventivasalud.com" className="font-medium text-[#1654a3] hover:underline">
-                soporte.rrhh@preventivasalud.com
-              </a>
-            </span>
-          </div>
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-8">
+        {/* Hero */}
+        <div className="text-center">
+          <span className="inline-block rounded-full bg-[#1654a3]/10 px-3 py-1 text-xs font-bold text-[#1654a3]">
+            Convocatoria Asistencial 2026
+          </span>
+          <h1 className="mt-4 text-3xl font-extrabold leading-tight text-slate-800 sm:text-4xl">
+            Creación de Cuenta y Registro Asistencial
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+            Únete a nuestra red hospitalaria y de atención ambulatoria en Colombia. Completa tu perfil
+            profesional en 3 sencillos pasos.
+          </p>
           <button
             type="button"
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold text-slate-700 hover:bg-slate-100"
+            onClick={onBackToLogin}
+            className="mt-3 text-sm font-semibold text-[#1654a3] hover:underline"
           >
-            <IconGlobe className="h-4 w-4" />
-            ES
+            ¿Ya tienes cuenta? Inicia sesión
           </button>
         </div>
-      </header>
 
-      {/* Contenido principal */}
-      <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8">
-        <div className="grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-2xl shadow-xl shadow-slate-900/10 lg:grid-cols-2">
-          {/* Panel izquierdo */}
-          <section
-            className="flex flex-col gap-10 p-8 text-white sm:p-10 lg:p-12"
-            style={{
-              background: `linear-gradient(160deg, ${BRAND.blue} 0%, ${BRAND.blueDark} 55%, #0f3d78 100%)`,
-            }}
-          >
-            {/* Logo */}
-            <div className="flex items-center gap-4 self-start rounded-xl bg-white/15 py-3 pl-4 pr-3 backdrop-blur-sm">
-              <img src={logo} alt="Preventiva Salud IPS" className="h-16 w-auto" />
-              <div className="h-12 w-px bg-white/25" />
-              <span className="rounded-md bg-[#ee7128] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white">
-                PORTAL EMPLEO
-              </span>
-            </div>
+        {/* Indicador de pasos */}
+        <div className="mt-8">
+          <StepIndicator step={step} />
+        </div>
 
-            <div>
-              <h1 className="text-3xl font-extrabold leading-tight sm:text-[2rem]">
-                Haz parte del equipo médico de Preventiva Salud IPS
-              </h1>
-              <p className="mt-4 text-sm leading-relaxed text-blue-100/85 sm:text-base">
-                Crea tu cuenta, completa tu perfil y postúlate a nuestras vacantes clínicas, asistenciales y
-                administrativas en todo el país.
-              </p>
-            </div>
-
-            {/* Highlights */}
-            <ul className="flex flex-col gap-3">
-              {HIGHLIGHTS.map((text) => (
-                <li key={text} className="flex items-center gap-2.5 text-sm text-blue-50">
-                  <IconCheck className="h-4 w-4 shrink-0 text-[#0ca3c5]" />
-                  {text}
-                </li>
-              ))}
-            </ul>
-
-            <p className="mt-auto text-xs text-blue-100/70">
-              Más de 500 profesionales de la salud ya hacen parte de Preventiva Salud IPS.
-            </p>
-          </section>
-
-          {/* Panel derecho */}
-          <section className="flex flex-col bg-white p-8 sm:p-10 lg:p-12">
-            <div className="mb-8">
-              <h2 className="text-2xl font-extrabold text-slate-800">Crea tu cuenta de candidato</h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-                Regístrate para postularte a nuestras vacantes. Podrás completar tu hoja de vida después de crear
-                tu cuenta.
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {/* Nombres y apellidos */}
-              <div>
-                <label htmlFor="fullName" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Nombres y Apellidos <span className="text-[#ee7128]">*</span>
-                </label>
-                <IconField
-                  icon={IconUser}
-                  id="fullName"
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Ej: Laura Andrea Gómez Pérez"
-                />
+        {/* Formulario */}
+        <form onSubmit={handleStepSubmit} className="mt-6 rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+          {step === 1 && (
+            <>
+              <div className="mb-6 flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-5">
+                <div>
+                  <h2 className="text-lg font-extrabold text-slate-800">
+                    Información Personal y Credenciales de Acceso
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Ingresa tus nombres completos tal y como aparecen en tu documento oficial de identidad.
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500">
+                  Requerido para nómina asistencial
+                </span>
               </div>
 
-              {/* Documento */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,11rem)_1fr]">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div>
                   <label htmlFor="docType" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                    Tipo <span className="text-[#ee7128]">*</span>
+                    Tipo de Documento <span className="text-[#ee7128]">*</span>
                   </label>
                   <select
                     id="docType"
-                    value={docType}
-                    onChange={(e) => setDocType(e.target.value)}
+                    value={form.docType}
+                    onChange={(e) => update('docType', e.target.value)}
                     className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
                   >
-                    <option value="CC">Cédula de Ciudadanía (CC)</option>
-                    <option value="CE">Cédula de Extranjería (CE)</option>
-                    <option value="PA">Pasaporte (PA)</option>
-                    <option value="PEP">Permiso Especial de Permanencia (PEP)</option>
+                    <option value="CC">Cédula de Ciudadanía (C.C.)</option>
+                    <option value="CE">Cédula de Extranjería (C.E.)</option>
+                    <option value="PA">Pasaporte</option>
+                    <option value="PEP">Permiso Especial de Permanencia</option>
                   </select>
                 </div>
                 <div>
                   <label htmlFor="document" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                    Número de Documento <span className="text-[#ee7128]">*</span>
+                    Número de Identificación <span className="text-[#ee7128]">*</span>
                   </label>
                   <IconField
-                    icon={IconIdCard}
                     id="document"
-                    type="text"
+                    icon={IconIdCard}
                     required
-                    value={document}
-                    onChange={(e) => setDocument(e.target.value)}
-                    placeholder="Ej: 1020345678"
+                    value={form.document}
+                    onChange={(e) => update('document', e.target.value)}
+                    placeholder="Ej. 1020345678"
                   />
                 </div>
-              </div>
 
-              {/* Correo y celular */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                    Correo Electrónico <span className="text-[#ee7128]">*</span>
+                  <label htmlFor="firstName" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Nombres Completos <span className="text-[#ee7128]">*</span>
                   </label>
                   <IconField
-                    icon={IconMail}
+                    id="firstName"
+                    icon={IconUser}
+                    required
+                    value={form.firstName}
+                    onChange={(e) => update('firstName', e.target.value)}
+                    placeholder="Ej. Laura Marcela"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Apellidos Completos <span className="text-[#ee7128]">*</span>
+                  </label>
+                  <IconField
+                    id="lastName"
+                    icon={IconUser}
+                    required
+                    value={form.lastName}
+                    onChange={(e) => update('lastName', e.target.value)}
+                    placeholder="Ej. Gómez Pérez"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Correo Electrónico Institucional o Personal <span className="text-[#ee7128]">*</span>
+                  </label>
+                  <IconField
                     id="email"
+                    icon={IconMail}
                     type="email"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu.correo@ejemplo.com"
+                    value={form.email}
+                    onChange={(e) => update('email', e.target.value)}
+                    placeholder="profesional@correo.com"
                   />
+                  <p className="mt-1.5 text-xs text-slate-400">
+                    Recibirás notificaciones del proceso y ofertas asistenciales.
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="phone" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                    Celular de Contacto <span className="text-[#ee7128]">*</span>
+                    Celular con WhatsApp Activo <span className="text-[#ee7128]">*</span>
                   </label>
                   <IconField
-                    icon={IconPhone}
                     id="phone"
+                    icon={IconPhone}
                     type="tel"
                     required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="300 123 4567"
+                    value={form.phone}
+                    onChange={(e) => update('phone', e.target.value)}
+                    placeholder="+57 300 123 4567"
                   />
+                  <p className="mt-1.5 text-xs text-slate-400">
+                    Para citación inmediata a entrevistas y pruebas clínicas.
+                  </p>
                 </div>
-              </div>
 
-              {/* Contraseña y confirmación */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                    Contraseña <span className="text-[#ee7128]">*</span>
+                    Contraseña Segura <span className="text-[#ee7128]">*</span>
                   </label>
                   <IconField
-                    icon={IconLock}
                     id="password"
+                    icon={IconLock}
                     type={showPassword ? 'text' : 'password'}
                     required
                     minLength={8}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={form.password}
+                    onChange={(e) => update('password', e.target.value)}
                     placeholder="Mínimo 8 caracteres"
                     rightElement={
                       <button
@@ -251,13 +318,13 @@ export default function Register({ onBackToLogin }) {
                     Confirmar Contraseña <span className="text-[#ee7128]">*</span>
                   </label>
                   <IconField
-                    icon={IconLock}
                     id="confirmPassword"
+                    icon={IconLock}
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
                     minLength={8}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    value={form.confirmPassword}
+                    onChange={(e) => update('confirmPassword', e.target.value)}
                     placeholder="Repite tu contraseña"
                     rightElement={
                       <button
@@ -273,10 +340,134 @@ export default function Register({ onBackToLogin }) {
                 </div>
               </div>
 
-              {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+              {error && <p className="mt-4 text-sm font-semibold text-red-600">{error}</p>}
+            </>
+          )}
 
-              {/* Tratamiento de datos */}
-              <label className="flex items-start gap-2.5 text-sm text-slate-600">
+          {step === 2 && (
+            <>
+              <div className="mb-6 border-b border-slate-100 pb-5">
+                <h2 className="text-lg font-extrabold text-slate-800">Perfil en Salud &amp; RETHUS</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Cuéntanos tu especialidad y datos de registro ante el Ministerio de Salud.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="specialty" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Especialidad o Profesión <span className="text-[#ee7128]">*</span>
+                  </label>
+                  <div className="relative">
+                    <IconStethoscope className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <select
+                      id="specialty"
+                      required
+                      value={form.specialty}
+                      onChange={(e) => update('specialty', e.target.value)}
+                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
+                    >
+                      <option value="">Selecciona una opción</option>
+                      <option>Odontología General</option>
+                      <option>Medicina General</option>
+                      <option>Enfermería</option>
+                      <option>Psicología Clínica</option>
+                      <option>Administrativo en Salud</option>
+                      <option>Otro</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="city" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Ciudad de Residencia <span className="text-[#ee7128]">*</span>
+                  </label>
+                  <IconField
+                    id="city"
+                    icon={IconMapPin}
+                    required
+                    value={form.city}
+                    onChange={(e) => update('city', e.target.value)}
+                    placeholder="Ej. Bogotá D.C."
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="rethus" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Número de Registro RETHUS
+                  </label>
+                  <IconField
+                    id="rethus"
+                    icon={IconShieldCheck}
+                    value={form.rethus}
+                    onChange={(e) => update('rethus', e.target.value)}
+                    placeholder="Ej. 110024982"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="license" className="mb-1.5 block text-sm font-semibold text-slate-700">Tarjeta Profesional</label>
+                  <IconField
+                    id="license"
+                    icon={IconIdCard}
+                    value={form.license}
+                    onChange={(e) => update('license', e.target.value)}
+                    placeholder="Número de tarjeta profesional"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="experience" className="mb-1.5 block text-sm font-semibold text-slate-700">Años de Experiencia</label>
+                  <select
+                    id="experience"
+                    value={form.experience}
+                    onChange={(e) => update('experience', e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20 sm:w-1/2"
+                  >
+                    {EXPERIENCE_OPTIONS.map((opt) => (
+                      <option key={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <div className="mb-6 border-b border-slate-100 pb-5">
+                <h2 className="text-lg font-extrabold text-slate-800">Soportes y Hoja de Vida</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Adjunta tus certificados en PDF. Podrás completarlos más adelante desde tu perfil.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <UploadRow
+                  label="Hoja de Vida"
+                  file={documents.cv}
+                  onUpload={() => uploadDoc('cv', 'Hoja-de-vida.pdf')}
+                  onRemove={() => uploadDoc('cv', null)}
+                />
+                <UploadRow
+                  label="Diploma o Acta de Grado"
+                  file={documents.diploma}
+                  onUpload={() => uploadDoc('diploma', 'Diploma.pdf')}
+                  onRemove={() => uploadDoc('diploma', null)}
+                />
+                <UploadRow
+                  label="Tarjeta Profesional"
+                  file={documents.license}
+                  onUpload={() => uploadDoc('license', 'Tarjeta-profesional.pdf')}
+                  onRemove={() => uploadDoc('license', null)}
+                />
+                <UploadRow
+                  label="Certificado RETHUS"
+                  file={documents.rethusCert}
+                  onUpload={() => uploadDoc('rethusCert', 'Certificado-RETHUS.pdf')}
+                  onRemove={() => uploadDoc('rethusCert', null)}
+                />
+              </div>
+
+              <label className="mt-5 flex items-start gap-2.5 text-sm text-slate-600">
                 <input
                   type="checkbox"
                   required
@@ -292,38 +483,51 @@ export default function Register({ onBackToLogin }) {
                   .
                 </span>
               </label>
+            </>
+          )}
 
-              {/* Submit */}
-              <Button type="submit" size="lg" fullWidth>
-                Crear mi cuenta
-                <IconUserPlus className="h-4 w-4" />
-              </Button>
-            </form>
+          {/* Navegación del formulario */}
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-700"
+            >
+              <IconSave className="h-4 w-4" />
+              Guardar borrador
+            </button>
 
-            {/* Volver a login */}
-            <div className="mt-auto border-t border-slate-100 pt-6 text-center">
-              <p className="text-sm text-slate-500">¿Ya tienes una cuenta?</p>
-              <Button variant="outline" onClick={onBackToLogin} className="mt-3 w-full sm:w-auto">
-                <IconLogin className="h-4 w-4" />
-                Inicia sesión
+            <div className="flex items-center gap-3">
+              {step > 1 && (
+                <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>
+                  Atrás
+                </Button>
+              )}
+              <Button type="submit">
+                {step < 3 ? 'Continuar al Paso Siguiente' : 'Crear mi cuenta'}
+                {step < 3 ? <IconArrowRight className="h-4 w-4" /> : <IconUserPlus className="h-4 w-4" />}
               </Button>
             </div>
-          </section>
-        </div>
-      </main>
+          </div>
+        </form>
 
-      {/* Footer */}
-      <footer className="border-t border-black/5 bg-white px-4 py-5 text-xs text-slate-500 sm:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            <span className="font-semibold text-slate-700">Preventiva Salud IPS S.A.S.</span> · Vigilado
-            Supersalud
+        {/* Confianza */}
+        <div className="mt-6 flex flex-col flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-slate-500 sm:flex-row">
+          <span className="flex items-center gap-1.5">
+            <IconShieldCheck className="h-4 w-4 text-[#1654a3]" />
+            Proceso Seguro Cifrado SSL 256-bit
           </span>
-          <a href="#" className="hover:text-[#1654a3] hover:underline">
-            Política de Tratamiento de Datos (Ley 1581)
-          </a>
+          <span className="flex items-center gap-1.5">
+            <IconCheck className="h-4 w-4 text-[#0ca3c5]" />
+            Conexión Directa con Validación RETHUS
+          </span>
+          <span className="flex items-center gap-1.5">
+            <IconHeadset className="h-4 w-4 text-[#1654a3]" />
+            Soporte a Candidatos: talento@preventivasalud.com
+          </span>
         </div>
-      </footer>
+      </div>
+
+      <SiteFooter />
     </div>
   )
 }
