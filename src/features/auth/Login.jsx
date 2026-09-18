@@ -3,15 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../app/AppContext'
 import { BRAND } from '../../components/brand'
 import logo from '../../assets/logo-preventiva.png'
+import SiteHeader from '../../components/SiteHeader'
 import Button from '../../components/Button'
 import IconField from '../../components/IconField'
 import {
-  IconArrowLeft,
-  IconHeadset,
-  IconGlobe,
-  IconUsers,
-  IconBriefcase,
-  IconIdCard,
+  IconMail,
   IconLock,
   IconEye,
   IconEyeOff,
@@ -29,9 +25,7 @@ const HIGHLIGHTS = [
 export default function Login() {
   const navigate = useNavigate()
   const { login } = useApp()
-  const [role, setRole] = useState('candidato')
-  const [docType, setDocType] = useState('CC')
-  const [identifier, setIdentifier] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(false)
@@ -39,43 +33,13 @@ export default function Login() {
   function handleSubmit(e) {
     e.preventDefault()
     // TODO: conectar con el servicio de autenticación
-    login(role)
+    login('candidato')
     navigate('/')
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#eef2f7]">
-      {/* Barra superior */}
-      <header className="flex items-center justify-between gap-4 border-b border-black/5 bg-white px-4 py-3 sm:px-8">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-sm font-semibold text-[#1654a3] hover:text-[#0ca3c5] transition-colors"
-        >
-          <IconArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Volver a Vacantes Disponibles</span>
-          <span className="sm:hidden">Volver</span>
-        </button>
-
-        <div className="flex items-center gap-4 text-sm text-slate-600">
-          <div className="hidden items-center gap-2 md:flex">
-            <IconHeadset className="h-4 w-4 text-[#1654a3]" />
-            <span>
-              Mesa de Ayuda Talento:{' '}
-              <a href="mailto:soporte@preventivasalud.com" className="font-medium text-[#1654a3] hover:underline">
-                soporte@preventivasalud.com
-              </a>
-            </span>
-          </div>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold text-slate-700 hover:bg-slate-100"
-          >
-            <IconGlobe className="h-4 w-4" />
-            ES
-          </button>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Contenido principal */}
       <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8">
@@ -123,34 +87,6 @@ export default function Login() {
 
           {/* Panel derecho */}
           <section className="flex flex-col bg-white p-8 sm:p-10 lg:p-12">
-            {/* Tabs de rol */}
-            <div className="mb-6 flex rounded-xl bg-slate-100 p-1">
-              <button
-                type="button"
-                onClick={() => setRole('candidato')}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
-                  role === 'candidato'
-                    ? 'bg-white text-[#1654a3] shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <IconUsers className="h-4 w-4" />
-                Soy Candidato / Aspirante
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('reclutador')}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
-                  role === 'reclutador'
-                    ? 'bg-white text-[#1654a3] shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <IconBriefcase className="h-4 w-4" />
-                Gestión Humana &amp; Reclutadores
-              </button>
-            </div>
-
             <div className="mb-8">
               <h2 className="text-2xl font-extrabold text-slate-800">Iniciar sesión en tu cuenta</h2>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
@@ -160,36 +96,19 @@ export default function Login() {
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {/* Tipo de documento */}
+              {/* Correo */}
               <div>
-                <label htmlFor="docType" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Tipo de Documento de Identidad <span className="text-[#ee7128]">*</span>
-                </label>
-                <select
-                  id="docType"
-                  value={docType}
-                  onChange={(e) => setDocType(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
-                >
-                  <option value="CC">Cédula de Ciudadanía (CC)</option>
-                  <option value="CE">Cédula de Extranjería (CE)</option>
-                  <option value="PA">Pasaporte (PA)</option>
-                  <option value="PEP">Permiso Especial de Permanencia (PEP)</option>
-                </select>
-              </div>
-
-              {/* Documento o correo */}
-              <div>
-                <label htmlFor="identifier" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Número de Documento o Correo Registrado <span className="text-[#ee7128]">*</span>
+                <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Correo Electrónico <span className="text-[#ee7128]">*</span>
                 </label>
                 <IconField
-                  icon={IconIdCard}
-                  id="identifier"
-                  type="text"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="Ej: 1020345678 o tu.correo@ejemplo.com"
+                  icon={IconMail}
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu.correo@ejemplo.com"
                 />
               </div>
 
@@ -200,7 +119,7 @@ export default function Login() {
                     Contraseña de Acceso <span className="text-[#ee7128]">*</span>
                   </label>
                   <a href="#" className="text-xs font-semibold text-[#1654a3] hover:underline">
-                    ¿Olvidaste tu contraseña o documento?
+                    ¿Olvidaste tu contraseña?
                   </a>
                 </div>
                 <IconField
