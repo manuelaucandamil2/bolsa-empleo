@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../app/AppContext'
 import SiteHeader from '../../components/SiteHeader'
@@ -23,6 +23,9 @@ import {
   IconTrash,
   IconCheck,
   IconClock,
+  IconStethoscope,
+  IconShieldCheck,
+  IconCamera,
 } from '../../components/icons'
 
 const TABS = [
@@ -31,7 +34,33 @@ const TABS = [
   { id: 'experiencia', label: 'Experiencia Laboral', icon: IconBriefcase },
 ]
 
-const INITIAL_PERSONAL = {
+const SPECIALTY_OPTIONS = [
+  'Odontología General',
+  'Medicina General',
+  'Enfermería',
+  'Psicología Clínica',
+  'Administrativo en Salud',
+  'Otro',
+]
+
+const EXPERIENCE_OPTIONS = ['Sin experiencia / Rural (SSO)', '1 a 3 años', '4 años o más / Especialista']
+
+// El RETHUS y la tarjeta profesional solo aplican a cargos asistenciales/clínicos.
+const REQUIRES_RETHUS = ['Odontología General', 'Medicina General', 'Enfermería', 'Psicología Clínica']
+
+function getRequiredDocumentNames(specialty) {
+  const base = ['Hoja de vida', 'Documento de identidad', 'Diploma o acta de grado']
+  return REQUIRES_RETHUS.includes(specialty) ? [...base, 'Tarjeta profesional', 'Certificado RETHUS'] : base
+}
+
+function buildDocuments(specialty, statusByName = {}) {
+  return getRequiredDocumentNames(specialty).map((name) => ({
+    name,
+    status: statusByName[name] ?? 'Pendiente',
+  }))
+}
+
+const DEMO_PERSONAL = {
   fullName: 'Manuela Urrea Candamil',
   document: '1020345678',
   birthDate: '1996-04-12',
@@ -40,11 +69,26 @@ const INITIAL_PERSONAL = {
   email: 'Manuela.urrea@ejemplo.com',
 }
 
-const INITIAL_EDUCATION = [
+const DEMO_PROFESSIONAL = {
+  specialty: 'Odontología General',
+  rethus: '110024982',
+  license: 'COL-OD-4521',
+  experience: EXPERIENCE_OPTIONS[1],
+}
+
+const DEMO_DOCUMENT_STATUS = {
+  'Hoja de vida': 'Completo',
+  'Documento de identidad': 'Completo',
+  'Diploma o acta de grado': 'Pendiente',
+  'Tarjeta profesional': 'Pendiente',
+  'Certificado RETHUS': 'Pendiente',
+}
+
+const DEMO_EDUCATION = [
   { id: 'edu-1', institution: 'Universidad Nacional de Colombia', degree: 'Odontología', level: 'Profesional', year: '2020' },
 ]
 
-const INITIAL_EXPERIENCE = [
+const DEMO_EXPERIENCE = [
   {
     id: 'exp-1',
     company: 'Clínica Dental Sonrisas',
@@ -54,15 +98,7 @@ const INITIAL_EXPERIENCE = [
   },
 ]
 
-const INITIAL_SKILLS = ['Operatoria dental', 'Atención al paciente', 'Excel']
-
-const INITIAL_DOCUMENTS = [
-  { name: 'Hoja de vida', status: 'Completo' },
-  { name: 'Documento de identidad', status: 'Completo' },
-  { name: 'Diploma o acta de grado', status: 'Pendiente' },
-  { name: 'Tarjeta profesional', status: 'Pendiente' },
-  { name: 'Certificado RETHUS', status: 'Pendiente' },
-]
+const DEMO_SKILLS = ['Operatoria dental', 'Atención al paciente', 'Excel']
 
 function updateListItem(list, setList, id, field, value) {
   setList(list.map((item) => (item.id === id ? { ...item, [field]: value } : item)))
@@ -86,18 +122,45 @@ function SectionCard({ icon: Icon, title, action, children }) {
 
 export default function Perfil() {
   const navigate = useNavigate()
-  const { applications } = useApp()
-  const [personal, setPersonal] = useState(INITIAL_PERSONAL)
+  const { applications, profile, updateProfile } = useApp()
+  const [photoUrl, setPhotoUrl] = useState(profile?.photoUrl ?? null)
+
+  // Si viene de Registro, el perfil arranca casi vacío (solo lo que ya dio de alta).
+  // Si no (entró por Login, simulando una cuenta existente), se ve con datos de ejemplo.
+  const [personal, setPersonal] = useState(() =>
+    profile
+      ? { fullName: profile.fullName, document: profile.document, birthDate: '', city: profile.city, phone: '', email: profile.email }
+      : DEMO_PERSONAL,
+  )
+  const [professional, setProfessional] = useState(() =>
+    profile ? { specialty: profile.specialty, rethus: '', license: '', experience: '' } : DEMO_PROFESSIONAL,
+  )
   const [cvFile, setCvFile] = useState(null)
-  const [education, setEducation] = useState(INITIAL_EDUCATION)
-  const [experience, setExperience] = useState(INITIAL_EXPERIENCE)
-  const [skills, setSkills] = useState(INITIAL_SKILLS)
+  const [education, setEducation] = useState(() => (profile ? [] : DEMO_EDUCATION))
+  const [experience, setExperience] = useState(() => (profile ? [] : DEMO_EXPERIENCE))
+  const [skills, setSkills] = useState(() => (profile ? [] : DEMO_SKILLS))
   const [skillInput, setSkillInput] = useState('')
-  const [documents, setDocuments] = useState(INITIAL_DOCUMENTS)
+  const [documents, setDocuments] = useState(() =>
+    buildDocuments(profile ? profile.specialty : DEMO_PROFESSIONAL.specialty, profile ? {} : DEMO_DOCUMENT_STATUS),
+  )
   const [activeTab, setActiveTab] = useState('personal')
+
+  const requiresRethus = REQUIRES_RETHUS.includes(professional.specialty)
 
   function updatePersonal(field, value) {
     setPersonal((p) => ({ ...p, [field]: value }))
+  }
+
+  function updateProfessional(field, value) {
+    if (field === 'specialty') {
+      setProfessional((p) => ({ ...p, specialty: value }))
+      setDocuments((prev) => {
+        const required = getRequiredDocumentNames(value)
+        return required.map((name) => prev.find((d) => d.name === name) ?? { name, status: 'Pendiente' })
+      })
+      return
+    }
+    setProfessional((p) => ({ ...p, [field]: value }))
   }
 
   function addSkill() {
@@ -114,13 +177,17 @@ export default function Perfil() {
 
   const personalFields = Object.values(personal)
   const personalPct = personalFields.filter(Boolean).length / personalFields.length
+  const professionalFields = requiresRethus
+    ? [professional.specialty, professional.rethus, professional.license, professional.experience]
+    : [professional.specialty, professional.experience]
+  const professionalPct = professionalFields.filter(Boolean).length / professionalFields.length
   const cvPct = cvFile ? 1 : 0
   const eduPct = education.length > 0 ? 1 : 0
   const expPct = experience.length > 0 ? 1 : 0
   const skillsPct = Math.min(skills.length / 3, 1)
   const docsPct = documents.filter((d) => d.status === 'Completo').length / documents.length
   const completion = Math.round(
-    ((personalPct + cvPct + eduPct + expPct + skillsPct + docsPct) / 6) * 100,
+    ((personalPct + professionalPct + cvPct + eduPct + expPct + skillsPct + docsPct) / 7) * 100,
   )
 
   const initials = personal.fullName
@@ -129,6 +196,19 @@ export default function Perfil() {
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+
+  // Mantiene el nombre y la foto visibles en el menú del header, sin importar
+  // si el perfil llegó por Registro o por el Login de ejemplo.
+  useEffect(() => {
+    updateProfile({ fullName: personal.fullName, photoUrl })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personal.fullName, photoUrl])
+
+  function handlePhotoUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoUrl(URL.createObjectURL(file))
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f8fc]">
@@ -148,9 +228,17 @@ export default function Perfil() {
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#1654a3] text-lg font-bold text-white">
-                {initials || '??'}
-              </div>
+              <label className="group relative flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1654a3] text-lg font-bold text-white">
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Foto de perfil" className="h-16 w-16 rounded-full object-cover" />
+                ) : (
+                  initials || '??'
+                )}
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                  <IconCamera className="h-5 w-5 text-white" />
+                </span>
+                <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+              </label>
               <div>
                 <h1 className="text-xl font-extrabold text-slate-800">{personal.fullName || 'Candidato'}</h1>
                 <p className="text-sm text-slate-500">Perfil de Candidato · Preventiva Salud IPS</p>
@@ -258,6 +346,60 @@ export default function Perfil() {
                       placeholder="Correo electrónico"
                     />
                   </div>
+                </SectionCard>
+
+                <SectionCard icon={IconStethoscope} title="Información Profesional">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="specialty" className="mb-1.5 block text-xs font-semibold text-slate-500">Cargo / Especialidad</label>
+                      <select
+                        id="specialty"
+                        value={professional.specialty}
+                        onChange={(e) => updateProfessional('specialty', e.target.value)}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
+                      >
+                        <option value="">Selecciona una opción</option>
+                        {SPECIALTY_OPTIONS.map((opt) => (
+                          <option key={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="experience" className="mb-1.5 block text-xs font-semibold text-slate-500">Años de Experiencia</label>
+                      <select
+                        id="experience"
+                        value={professional.experience}
+                        onChange={(e) => updateProfessional('experience', e.target.value)}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[#1654a3] focus:ring-2 focus:ring-[#1654a3]/20"
+                      >
+                        <option value="">Selecciona una opción</option>
+                        {EXPERIENCE_OPTIONS.map((opt) => (
+                          <option key={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {requiresRethus && (
+                      <>
+                        <IconField
+                          icon={IconShieldCheck}
+                          value={professional.rethus}
+                          onChange={(e) => updateProfessional('rethus', e.target.value)}
+                          placeholder="Número de Registro RETHUS"
+                        />
+                        <IconField
+                          icon={IconIdCard}
+                          value={professional.license}
+                          onChange={(e) => updateProfessional('license', e.target.value)}
+                          placeholder="Tarjeta profesional"
+                        />
+                      </>
+                    )}
+                  </div>
+                  {!requiresRethus && professional.specialty && (
+                    <p className="mt-3 text-xs text-slate-400">
+                      Tu cargo no requiere registro RETHUS ni tarjeta profesional.
+                    </p>
+                  )}
                 </SectionCard>
 
                 <SectionCard icon={IconCheck} title="Conocimientos y Habilidades">
@@ -472,9 +614,23 @@ export default function Perfil() {
             </SectionCard>
 
             {/* Mis postulaciones */}
-            <SectionCard icon={IconClock} title="Mis Postulaciones">
+            <SectionCard
+              icon={IconClock}
+              title="Mis Postulaciones"
+              action={
+                applications.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/postulaciones')}
+                    className="text-xs font-bold text-[#1654a3] hover:underline"
+                  >
+                    Ver todas
+                  </button>
+                )
+              }
+            >
               <div className="flex flex-col gap-4">
-                {applications.map((app) => (
+                {applications.slice(0, 3).map((app) => (
                   <div key={app.jobId ?? app.vacante} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
                     <p className="text-sm font-bold text-slate-800">{app.vacante}</p>
                     <p className="mt-1 text-xs text-slate-500">Postulado el {app.fecha}</p>
