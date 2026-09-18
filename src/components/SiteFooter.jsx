@@ -11,7 +11,7 @@ const FOOTER_LINKS = [
 export default function SiteFooter() {
   return (
     <footer className="px-4 py-10 text-slate-300 sm:px-8" style={{ background: '#0c2340' }}>
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-3">
+      <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-8 sm:grid-cols-3">
         <div>
           <div className="flex items-center gap-1.5 text-lg font-extrabold leading-none text-white">
             <span>Preventiva Salud IPS</span>
@@ -58,7 +58,7 @@ export default function SiteFooter() {
         </div>
       </div>
 
-      <div className="mx-auto mt-8 flex max-w-7xl flex-col gap-2 border-t border-white/10 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto mt-8 flex max-w-[1800px] flex-col gap-2 border-t border-white/10 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <span>© 2026 Preventiva Salud IPS. Todos los derechos reservados. Vigilado Supersalud.</span>
         <span>Portal Oficial de Empleo · Versión 3.2.0</span>
       </div>

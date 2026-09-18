@@ -1,3 +1,13 @@
+export const APPLICATION_STAGES = [
+  'Postulación',
+  'Revisión de hoja de vida',
+  'Entrevista',
+  'Evaluaciones',
+  'Validaciones',
+  'Exámenes médicos',
+  'Contratación',
+]
+
 export const BADGE_STYLES = {
   neutral: 'bg-slate-100 text-slate-600',
   urgent: 'bg-[#ee7128]/10 text-[#ee7128]',
