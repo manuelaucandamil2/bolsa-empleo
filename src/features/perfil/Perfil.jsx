@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../app/AppContext'
+import { api } from '../../app/api'
 import SiteHeader from '../../components/SiteHeader'
 import SiteFooter from '../../components/SiteFooter'
 import Button from '../../components/Button'
@@ -48,57 +49,8 @@ const EXPERIENCE_OPTIONS = ['Sin experiencia / Rural (SSO)', '1 a 3 años', '4 a
 // El RETHUS y la tarjeta profesional solo aplican a cargos asistenciales/clínicos.
 const REQUIRES_RETHUS = ['Odontología General', 'Medicina General', 'Enfermería', 'Psicología Clínica']
 
-function getRequiredDocumentNames(specialty) {
-  const base = ['Hoja de vida', 'Documento de identidad', 'Diploma o acta de grado']
-  return REQUIRES_RETHUS.includes(specialty) ? [...base, 'Tarjeta profesional', 'Certificado RETHUS'] : base
-}
-
-function buildDocuments(specialty, statusByName = {}) {
-  return getRequiredDocumentNames(specialty).map((name) => ({
-    name,
-    status: statusByName[name] ?? 'Pendiente',
-  }))
-}
-
-const DEMO_PERSONAL = {
-  fullName: 'Manuela Urrea Candamil',
-  document: '1020345678',
-  birthDate: '1996-04-12',
-  city: 'Medellín',
-  phone: '300 123 4567',
-  email: 'Manuela.urrea@ejemplo.com',
-}
-
-const DEMO_PROFESSIONAL = {
-  specialty: 'Odontología General',
-  rethus: '110024982',
-  license: 'COL-OD-4521',
-  experience: EXPERIENCE_OPTIONS[1],
-}
-
-const DEMO_DOCUMENT_STATUS = {
-  'Hoja de vida': 'Completo',
-  'Documento de identidad': 'Completo',
-  'Diploma o acta de grado': 'Pendiente',
-  'Tarjeta profesional': 'Pendiente',
-  'Certificado RETHUS': 'Pendiente',
-}
-
-const DEMO_EDUCATION = [
-  { id: 'edu-1', institution: 'Universidad Nacional de Colombia', degree: 'Odontología', level: 'Profesional', year: '2020' },
-]
-
-const DEMO_EXPERIENCE = [
-  {
-    id: 'exp-1',
-    company: 'Clínica Dental Sonrisas',
-    role: 'Odontóloga General',
-    period: '2021 - 2024',
-    description: 'Atención odontológica general, operatoria y prótesis fija.',
-  },
-]
-
-const DEMO_SKILLS = ['Operatoria dental', 'Atención al paciente', 'Excel']
+const EMPTY_PERSONAL = { fullName: '', document: '', birthDate: '', city: '', phone: '', email: '' }
+const EMPTY_PROFESSIONAL = { specialty: '', rethus: '', license: '', experience: '' }
 
 function updateListItem(list, setList, id, field, value) {
   setList(list.map((item) => (item.id === id ? { ...item, [field]: value } : item)))
@@ -123,56 +75,108 @@ function SectionCard({ icon: Icon, title, action, children }) {
 export default function Perfil() {
   const navigate = useNavigate()
   const { applications, profile, updateProfile } = useApp()
+  const { token, saveProfile } = useApp()
+  const [loading, setLoading] = useState(true)
   const [photoUrl, setPhotoUrl] = useState(profile?.photoUrl ?? null)
 
-  // Si viene de Registro, el perfil arranca casi vacío (solo lo que ya dio de alta).
-  // Si no (entró por Login, simulando una cuenta existente), se ve con datos de ejemplo.
-  const [personal, setPersonal] = useState(() =>
-    profile
-      ? { fullName: profile.fullName, document: profile.document, birthDate: '', city: profile.city, phone: '', email: profile.email }
-      : DEMO_PERSONAL,
-  )
-  const [professional, setProfessional] = useState(() =>
-    profile ? { specialty: profile.specialty, rethus: '', license: '', experience: '' } : DEMO_PROFESSIONAL,
-  )
+  const [personal, setPersonal] = useState(EMPTY_PERSONAL)
+  const [professional, setProfessional] = useState(EMPTY_PROFESSIONAL)
   const [cvFile, setCvFile] = useState(null)
-  const [education, setEducation] = useState(() => (profile ? [] : DEMO_EDUCATION))
-  const [experience, setExperience] = useState(() => (profile ? [] : DEMO_EXPERIENCE))
-  const [skills, setSkills] = useState(() => (profile ? [] : DEMO_SKILLS))
+  const [education, setEducation] = useState([])
+  const [experience, setExperience] = useState([])
+  const [skills, setSkills] = useState([])
   const [skillInput, setSkillInput] = useState('')
-  const [documents, setDocuments] = useState(() =>
-    buildDocuments(profile ? profile.specialty : DEMO_PROFESSIONAL.specialty, profile ? {} : DEMO_DOCUMENT_STATUS),
-  )
+  const [documents, setDocuments] = useState([])
   const [activeTab, setActiveTab] = useState('personal')
+  const [saveState, setSaveState] = useState('idle') // idle | saving | saved | error
+  const [saveError, setSaveError] = useState('')
 
   const requiresRethus = REQUIRES_RETHUS.includes(professional.specialty)
+
+  // Carga el perfil real desde el backend (datos personales, especialidad,
+  // formación, experiencia, habilidades y documentos requeridos según el cargo).
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+
+    api
+      .getPerfil(token)
+      .then((data) => {
+        if (cancelled) return
+        setPersonal({
+          fullName: data.fullName ?? '',
+          document: data.document ?? '',
+          birthDate: data.birthDate ? data.birthDate.slice(0, 10) : '',
+          city: data.city ?? '',
+          phone: data.phone ?? '',
+          email: data.email ?? '',
+        })
+        setProfessional((p) => ({ ...p, specialty: data.specialty ?? '' }))
+        setPhotoUrl(data.photoUrl ?? null)
+        setEducation(data.education ?? [])
+        setExperience(data.experience ?? [])
+        setSkills(data.skills ?? [])
+        setDocuments(data.documents ?? [])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [token])
 
   function updatePersonal(field, value) {
     setPersonal((p) => ({ ...p, [field]: value }))
   }
 
   function updateProfessional(field, value) {
-    if (field === 'specialty') {
-      setProfessional((p) => ({ ...p, specialty: value }))
-      setDocuments((prev) => {
-        const required = getRequiredDocumentNames(value)
-        return required.map((name) => prev.find((d) => d.name === name) ?? { name, status: 'Pendiente' })
-      })
-      return
-    }
     setProfessional((p) => ({ ...p, [field]: value }))
   }
 
-  function addSkill() {
+  async function addSkill() {
     const value = skillInput.trim()
-    if (value && !skills.includes(value)) {
-      setSkills([...skills, value])
+    if (!value || skills.some((s) => s.name === value)) {
+      setSkillInput('')
+      return
     }
     setSkillInput('')
+    const skill = await api.addPerfilSkill(token, value)
+    setSkills((prev) => [...prev, skill])
   }
 
-  function markDocumentComplete(index) {
-    setDocuments(documents.map((d, i) => (i === index ? { ...d, status: 'Completo' } : d)))
+  async function removeSkill(id) {
+    setSkills((prev) => prev.filter((s) => s.id !== id))
+    await api.removePerfilSkill(token, id)
+  }
+
+  async function markDocumentComplete(documentTypeId) {
+    setDocuments((prev) => prev.map((d) => (d.documentTypeId === documentTypeId ? { ...d, status: 'Completo' } : d)))
+    await api.updateDocumento(token, documentTypeId, { status: 'Completo' })
+  }
+
+  async function handleSaveProfile() {
+    setSaveState('saving')
+    setSaveError('')
+    try {
+      await saveProfile({
+        fullName: personal.fullName,
+        document: personal.document,
+        city: personal.city,
+        phone: personal.phone,
+        specialty: professional.specialty,
+        ...(personal.birthDate ? { birthDate: personal.birthDate } : {}),
+      })
+      // La lista de documentos requeridos depende de la especialidad, que pudo cambiar.
+      const refreshed = await api.getPerfil(token)
+      setDocuments(refreshed.documents ?? [])
+      setSaveState('saved')
+      setTimeout(() => setSaveState('idle'), 2500)
+    } catch (err) {
+      setSaveState('error')
+      setSaveError(err.message)
+    }
   }
 
   const personalFields = Object.values(personal)
@@ -185,7 +189,7 @@ export default function Perfil() {
   const eduPct = education.length > 0 ? 1 : 0
   const expPct = experience.length > 0 ? 1 : 0
   const skillsPct = Math.min(skills.length / 3, 1)
-  const docsPct = documents.filter((d) => d.status === 'Completo').length / documents.length
+  const docsPct = documents.length > 0 ? documents.filter((d) => d.status === 'Completo').length / documents.length : 0
   const completion = Math.round(
     ((personalPct + professionalPct + cvPct + eduPct + expPct + skillsPct + docsPct) / 7) * 100,
   )
@@ -197,8 +201,8 @@ export default function Perfil() {
     .join('')
     .toUpperCase()
 
-  // Mantiene el nombre y la foto visibles en el menú del header, sin importar
-  // si el perfil llegó por Registro o por el Login de ejemplo.
+  // Mantiene el nombre y la foto visibles en el menú del header al instante,
+  // sin esperar a la respuesta del backend (esa persistencia real ocurre en handleSaveProfile).
   useEffect(() => {
     updateProfile({ fullName: personal.fullName, photoUrl })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,6 +212,14 @@ export default function Perfil() {
     const file = e.target.files?.[0]
     if (!file) return
     setPhotoUrl(URL.createObjectURL(file))
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f8fc] text-sm text-slate-400">
+        Cargando tu perfil...
+      </div>
+    )
   }
 
   return (
@@ -342,7 +354,9 @@ export default function Perfil() {
                       icon={IconMail}
                       type="email"
                       value={personal.email}
-                      onChange={(e) => updatePersonal('email', e.target.value)}
+                      disabled
+                      title="El correo de acceso no se puede editar desde aquí"
+                      className="opacity-70"
                       placeholder="Correo electrónico"
                     />
                   </div>
@@ -400,20 +414,35 @@ export default function Perfil() {
                       Tu cargo no requiere registro RETHUS ni tarjeta profesional.
                     </p>
                   )}
+
+                  <div className="mt-5 flex items-center gap-3 border-t border-slate-100 pt-4">
+                    <Button size="sm" onClick={handleSaveProfile} disabled={saveState === 'saving'}>
+                      {saveState === 'saving' ? 'Guardando...' : 'Guardar cambios'}
+                    </Button>
+                    {saveState === 'saved' && (
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-[#0ca3c5]">
+                        <IconCheck className="h-4 w-4" />
+                        Cambios guardados
+                      </span>
+                    )}
+                    {saveState === 'error' && (
+                      <span className="text-sm font-semibold text-red-600">{saveError}</span>
+                    )}
+                  </div>
                 </SectionCard>
 
                 <SectionCard icon={IconCheck} title="Conocimientos y Habilidades">
                   <div className="mb-3 flex flex-wrap gap-2">
                     {skills.map((skill) => (
                       <span
-                        key={skill}
+                        key={skill.id}
                         className="flex items-center gap-1.5 rounded-md bg-[#1654a3]/10 px-2.5 py-1.5 text-xs font-semibold text-[#1654a3]"
                       >
-                        {skill}
+                        {skill.name}
                         <button
                           type="button"
-                          onClick={() => setSkills(skills.filter((s) => s !== skill))}
-                          aria-label={`Quitar ${skill}`}
+                          onClick={() => removeSkill(skill.id)}
+                          aria-label={`Quitar ${skill.name}`}
                         >
                           <IconX className="h-3 w-3" />
                         </button>
@@ -590,8 +619,8 @@ export default function Perfil() {
             {/* Documentos */}
             <SectionCard icon={IconFileCheck} title="Documentos">
               <ul className="flex flex-col gap-3">
-                {documents.map((doc, i) => (
-                  <li key={doc.name} className="flex items-center justify-between gap-2 text-sm">
+                {documents.map((doc) => (
+                  <li key={doc.documentTypeId} className="flex items-center justify-between gap-2 text-sm">
                     <span className="text-slate-600">{doc.name}</span>
                     {doc.status === 'Completo' ? (
                       <span className="flex items-center gap-1 text-xs font-bold text-[#0ca3c5]">
@@ -601,7 +630,7 @@ export default function Perfil() {
                     ) : (
                       <button
                         type="button"
-                        onClick={() => markDocumentComplete(i)}
+                        onClick={() => markDocumentComplete(doc.documentTypeId)}
                         className="flex items-center gap-1 text-xs font-bold text-[#ee7128] hover:underline"
                       >
                         <IconUpload className="h-3.5 w-3.5" />
@@ -610,6 +639,9 @@ export default function Perfil() {
                     )}
                   </li>
                 ))}
+                {documents.length === 0 && (
+                  <p className="text-sm text-slate-400">Selecciona tu cargo/especialidad para ver los documentos requeridos.</p>
+                )}
               </ul>
             </SectionCard>
 

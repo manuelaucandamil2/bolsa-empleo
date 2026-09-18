@@ -31,8 +31,9 @@ const SPECIALTY_OPTIONS = [
 
 export default function Register() {
   const navigate = useNavigate()
-  const { login, registerProfile } = useApp()
+  const { register } = useApp()
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const [form, setForm] = useState({
     docType: 'CC',
@@ -53,7 +54,7 @@ export default function Register() {
     setForm((f) => ({ ...f, [field]: value }))
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
 
     if (form.password !== form.confirmPassword) {
@@ -62,17 +63,23 @@ export default function Register() {
     }
 
     setError('')
-
-    registerProfile({
-      fullName: `${form.firstName} ${form.lastName}`.trim(),
-      docType: form.docType,
-      document: form.document,
-      email: form.email,
-      city: form.city,
-      specialty: form.specialty,
-    })
-    login('candidato')
-    navigate('/perfil')
+    setSubmitting(true)
+    try {
+      await register({
+        fullName: `${form.firstName} ${form.lastName}`.trim(),
+        docType: form.docType,
+        document: form.document,
+        email: form.email,
+        password: form.password,
+        city: form.city,
+        specialty: form.specialty,
+      })
+      navigate('/perfil')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -268,8 +275,8 @@ export default function Register() {
             </span>
           </label>
 
-          <Button type="submit" size="lg" fullWidth className="mt-6">
-            Crear mi cuenta
+          <Button type="submit" size="lg" fullWidth className="mt-6" disabled={submitting}>
+            {submitting ? 'Creando cuenta...' : 'Crear mi cuenta'}
             <IconUserPlus className="h-4 w-4" />
           </Button>
         </form>

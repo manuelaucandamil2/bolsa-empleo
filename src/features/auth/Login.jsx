@@ -29,12 +29,21 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(false)
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    // TODO: conectar con el servicio de autenticación
-    login('candidato')
-    navigate('/')
+    setError('')
+    setSubmitting(true)
+    try {
+      await login(email, password)
+      navigate('/')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -153,9 +162,11 @@ export default function Login() {
                 Recordar mis datos en este equipo
               </label>
 
+              {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+
               {/* Submit */}
-              <Button type="submit" size="lg" fullWidth>
-                Ingresar a mi perfil
+              <Button type="submit" size="lg" fullWidth disabled={submitting}>
+                {submitting ? 'Ingresando...' : 'Ingresar a mi perfil'}
                 <IconLogin className="h-4 w-4" />
               </Button>
             </form>
