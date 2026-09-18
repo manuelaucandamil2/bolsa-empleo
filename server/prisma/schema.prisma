@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Catálogo de roles (Configurabilidad: nuevos roles no requieren cambios de código).
+// Roles previstos por la plataforma completa de Gestión Humana, aunque hoy solo
+// se usa "candidato" desde el frontend de bolsa-empleo.
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String? // null cuando el usuario se autentica con un proveedor externo (ej. Google)
+  provider     String    @default("local") // local | google (a futuro)
+  fullName     String
+  docType      String?
+  document     String?
+  city         String?
+  phone        String?
+  birthDate    DateTime?
+  specialty    String?
+  photoUrl     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  postulaciones Postulacion[]
+  savedJobs     SavedJob[]
+  education     Education[]
+  experience    Experience[]
+  skills        Skill[]
+  documents     UserDocument[]
+  auditLogs     AuditLog[]
+}
+
+// Vacantes publicadas por Gestión Humana. El id es un slug legible
+// (ej. "odontologo-general-norte") para que coincida con las rutas del frontend.
+model Vacante {
+  id               String   @id
+  category         String
+  title            String
+  location         String
+  schedule         String
+  modality         String
+  description      String
+  responsibilities String[]
+  requirements     String[]
+  tags             String[]
+  salaryLabel      String
+  salary           String
+  badgeText        String
+  badgeTone        String
+  status           String   @default("abierta") // abierta | pausada | cerrada (configurable, no enum)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  postulaciones Postulacion[]
+  savedBy       SavedJob[]
+}
+
+model Postulacion {
+  id        String   @id @default(cuid())
+  estado    String   @default("En proceso")
+  etapa     String   @default("Postulación")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  vacanteId String
+  vacante   Vacante @relation(fields: [vacanteId], references: [id])
+
+  @@unique([userId, vacanteId])
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  vacanteId String
+  vacante   Vacante @relation(fields: [vacanteId], references: [id])
+
+  @@unique([userId, vacanteId])
+}
+
+model Education {
+  id          String @id @default(cuid())
+  institution String
+  degree      String
+  level       String
+  year        String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Experience {
+  id          String @id @default(cuid())
+  company     String
+  role        String
+  period      String
+  description String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Skill {
+  id   String @id @default(cuid())
+  name String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, name])
+}
+
+// Catálogo configurable de documentos requeridos (ej. RETHUS no aplica a todos los cargos).
+// requiredFor vacío = aplica a todas las especialidades.
+model DocumentType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  requiredFor String[]
+  createdAt   DateTime @default(now())
+
+  userDocuments UserDocument[]
+}
+
+model UserDocument {
+  id        String   @id @default(cuid())
+  status    String   @default("Pendiente") // Pendiente | Completo
+  fileUrl   String?
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  documentTypeId String
+  documentType   DocumentType @relation(fields: [documentTypeId], references: [id])
+
+  @@unique([userId, documentTypeId])
+}
+
+// Trazabilidad: historial de acciones sobre procesos/datos sensibles.
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+}
